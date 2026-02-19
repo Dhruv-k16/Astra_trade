@@ -409,36 +409,36 @@ async def get_leaderboard():
 # ============= ADMIN ROUTES =============
 
 def verify_admin(current_user: dict = Depends(get_current_user)):
-    \"\"\"Verify user is admin\"\"\"
-    if current_user.get(\"role\") != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail=\"Admin access required\")
+    """Verify user is admin"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
 
-@api_router.get(\"/admin/users\")
+@api_router.get("/admin/users")
 async def get_all_users(admin: dict = Depends(verify_admin)):
-    \"\"\"Get all users (admin only)\"\"\"
-    users = await db.users.find({}, {\"password\": 0}).to_list(100)
+    """Get all users (admin only)"""
+    users = await db.users.find({}, {"password": 0}).to_list(100)
     for user in users:
         user.pop('_id', None)
-    return {\"users\": users}
+    return {"users": users}
 
-@api_router.post(\"/admin/users\")
+@api_router.post("/admin/users")
 async def create_user_admin(user_data: UserCreate, admin: dict = Depends(verify_admin)):
-    \"\"\"Create a new user (admin only)\"\"\"
-    existing = await db.users.find_one({\"email\": user_data.email})
+    """Create a new user (admin only)"""
+    existing = await db.users.find_one({"email": user_data.email})
     if existing:
-        raise HTTPException(status_code=400, detail=\"Email already registered\")
+        raise HTTPException(status_code=400, detail="Email already registered")
     
     user_id = str(uuid.uuid4())
     user_dict = {
-        \"id\": user_id,
-        \"username\": user_data.username,
-        \"email\": user_data.email,
-        \"password\": get_password_hash(user_data.password),
-        \"role\": user_data.role,
-        \"virtual_balance\": STARTING_CAPITAL,
-        \"trade_count\": 0,
-        \"created_at\": datetime.now(timezone.utc).isoformat()
+        "id": user_id,
+        "username": user_data.username,
+        "email": user_data.email,
+        "password": get_password_hash(user_data.password),
+        "role": user_data.role,
+        "virtual_balance": STARTING_CAPITAL,
+        "trade_count": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.users.insert_one(user_dict)
@@ -446,34 +446,34 @@ async def create_user_admin(user_data: UserCreate, admin: dict = Depends(verify_
     user_dict.pop('_id', None)
     return user_dict
 
-@api_router.delete(\"/admin/users/{user_id}\")
+@api_router.delete("/admin/users/{user_id}")
 async def delete_user(user_id: str, admin: dict = Depends(verify_admin)):
-    \"\"\"Delete a user (admin only)\"\"\"
-    result = await db.users.delete_one({\"id\": user_id})
+    """Delete a user (admin only)"""
+    result = await db.users.delete_one({"id": user_id})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail=\"User not found\")
+        raise HTTPException(status_code=404, detail="User not found")
     
     # Also delete user's portfolio and orders
-    await db.portfolio.delete_many({\"user_id\": user_id})
-    await db.orders.delete_many({\"user_id\": user_id})
+    await db.portfolio.delete_many({"user_id": user_id})
+    await db.orders.delete_many({"user_id": user_id})
     
-    return {\"message\": \"User deleted successfully\"}
+    return {"message": "User deleted successfully"}
 
-@api_router.get(\"/admin/contest\")
+@api_router.get("/admin/contest")
 async def get_contest_config(admin: dict = Depends(verify_admin)):
-    \"\"\"Get contest configuration (admin only)\"\"\"
+    """Get contest configuration (admin only)"""
     config = await db.contest_config.find_one()
     if config:
         config.pop('_id', None)
         return config
-    return {\"trading_active\": True}
+    return {"trading_active": True}
 
-@api_router.put(\"/admin/contest\")
+@api_router.put("/admin/contest")
 async def update_contest_config(config: ContestConfig, admin: dict = Depends(verify_admin)):
-    \"\"\"Update contest configuration (admin only)\"\"\"
+    """Update contest configuration (admin only)"""
     config_dict = config.model_dump()
-    config_dict[\"start_time\"] = config_dict[\"start_time\"].isoformat()
-    config_dict[\"end_time\"] = config_dict[\"end_time\"].isoformat()
+    config_dict["start_time"] = config_dict["start_time"].isoformat()
+    config_dict["end_time"] = config_dict["end_time"].isoformat()
     
     await db.contest_config.delete_many({})
     await db.contest_config.insert_one(config_dict)
@@ -481,25 +481,25 @@ async def update_contest_config(config: ContestConfig, admin: dict = Depends(ver
     config_dict.pop('_id', None)
     return config_dict
 
-@api_router.post(\"/admin/contest/freeze\")
+@api_router.post("/admin/contest/freeze")
 async def freeze_trading(admin: dict = Depends(verify_admin)):
-    \"\"\"Freeze trading (admin only)\"\"\"
+    """Freeze trading (admin only)"""
     await db.contest_config.update_one(
         {},
-        {\"$set\": {\"trading_active\": False}},
+        {"$set": {"trading_active": False}},
         upsert=True
     )
-    return {\"message\": \"Trading frozen\"}
+    return {"message": "Trading frozen"}
 
-@api_router.post(\"/admin/contest/unfreeze\")
+@api_router.post("/admin/contest/unfreeze")
 async def unfreeze_trading(admin: dict = Depends(verify_admin)):
-    \"\"\"Unfreeze trading (admin only)\"\"\"
+    """Unfreeze trading (admin only)"""
     await db.contest_config.update_one(
         {},
-        {\"$set\": {\"trading_active\": True}},
+        {"$set": {"trading_active": True}},
         upsert=True
     )
-    return {\"message\": \"Trading unfrozen\"}
+    return {"message": "Trading unfrozen"}
 
 # Include router
 app.include_router(api_router)
