@@ -23,16 +23,17 @@ export const ThemeProvider = ({ children }) => {
   }, [theme]);
 
   const toggleTheme = () => {
-    // Cycle through: dark -> calm -> light -> dark
+    // Cycle through: dark -> calm -> light -> high-contrast -> dark
     setTheme(prev => {
       if (prev === 'dark') return 'calm';
       if (prev === 'calm') return 'light';
+      if (prev === 'light') return 'high-contrast';
       return 'dark';
     });
   };
   
   const setThemeMode = (mode) => {
-    if (['dark', 'calm', 'light'].includes(mode)) {
+    if (['dark', 'calm', 'light', 'high-contrast'].includes(mode)) {
       setTheme(mode);
     }
   };
