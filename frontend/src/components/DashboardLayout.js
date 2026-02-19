@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -10,8 +9,6 @@ import {
   Trophy,
   Settings,
   LogOut,
-  Sun,
-  Moon,
   Menu,
   X
 } from 'lucide-react';
@@ -19,7 +16,6 @@ import { useState } from 'react';
 
 const DashboardLayout = () => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
