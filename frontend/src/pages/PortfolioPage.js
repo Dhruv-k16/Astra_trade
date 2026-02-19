@@ -111,12 +111,12 @@ const PortfolioPage = () => {
                       <td className="p-4 text-right font-mono">₹{holding.invested.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                       <td className="p-4 text-right font-mono">₹{holding.current_value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                       <td className={`p-4 text-right font-mono font-semibold ${
-                        pnlPositive ? 'text-success' : 'text-destructive'
+                        pnlPositive ? 'text-gain' : 'text-loss'
                       }`}>
-                        {pnlPositive ? '+' : ''}₹{holding.pnl.toFixed(2)}
+                        {pnlPositive ? '▲ +' : '▼ '}₹{holding.pnl.toFixed(2)}
                       </td>
                       <td className={`p-4 text-right font-mono font-semibold ${
-                        pnlPositive ? 'text-success' : 'text-destructive'
+                        pnlPositive ? 'text-gain' : 'text-loss'
                       }`}>
                         {pnlPositive ? '+' : ''}{holding.pnl_percentage.toFixed(2)}%
                       </td>
