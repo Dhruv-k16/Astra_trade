@@ -212,10 +212,10 @@ const MarketPage = () => {
                 disabled={loading}
                 data-testid="confirm-trade-button"
                 className={`flex-1 py-3 px-4 rounded-lg text-white font-medium transition-all disabled:opacity-50 ${
-                  tradeType === 'BUY' ? 'bg-success hover:bg-success/90' : 'bg-destructive hover:bg-destructive/90'
+                  tradeType === 'BUY' ? 'bg-gain hover:opacity-90' : 'bg-loss hover:opacity-90'
                 }`}
               >
-                {loading ? 'Processing...' : `Confirm ${tradeType}`}
+                {loading ? 'Processing...' : `Confirm ${tradeType} ${tradeType === 'BUY' ? '▲' : '▼'}`}
               </button>
             </div>
           </div>
