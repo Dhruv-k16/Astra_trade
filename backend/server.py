@@ -506,4 +506,4 @@ app.include_router(api_router)
 
 @app.get("/health")
 async def health_check():
-    return {\"status\": \"healthy\", \"service\": \"campus-trading-platform\"}
+    return {"status": "healthy", "service": "campus-trading-platform"}
