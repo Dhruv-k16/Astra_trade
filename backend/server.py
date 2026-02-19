@@ -50,25 +50,6 @@ async def initialize_sample_data():
     if existing == 0:
         await db.instruments.insert_many(SAMPLE_STOCKS)
         logger.info(f"Initialized {len(SAMPLE_STOCKS)} sample stocks")
-    
-    # Initialize price cache with sample prices
-    for stock in SAMPLE_STOCKS:
-        if stock['instrument_key'] not in price_cache:
-            # Set realistic initial prices
-            base_prices = {
-                "RELIANCE": 2450.75,
-                "TCS": 3850.20,
-                "INFY": 1550.60,
-                "HDFCBANK": 1680.40,
-                "ICICIBANK": 1245.80,
-                "WIPRO": 485.30,
-                "TATAMOTORS": 920.15,
-                "APOLLOHOSP": 6850.50
-            }
-            price_cache[stock['instrument_key']] = {
-                "last_price": base_prices.get(stock['trading_symbol'], 1000.00),
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
 
 async def initialize_default_admin():
     """Create default admin user if not exists"""
