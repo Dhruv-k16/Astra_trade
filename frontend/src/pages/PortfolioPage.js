@@ -61,9 +61,9 @@ const PortfolioPage = () => {
         <div className="bg-card border border-border rounded-xl p-6">
           <div className="text-sm text-muted-foreground mb-1">Total P&L</div>
           <div className={`text-2xl font-bold font-mono ${
-            portfolio?.total_pnl >= 0 ? 'text-success' : 'text-destructive'
+            portfolio?.total_pnl >= 0 ? 'text-gain' : 'text-loss'
           }`}>
-            {portfolio?.total_pnl >= 0 ? '+' : ''}₹{portfolio?.total_pnl?.toFixed(2)}
+            {portfolio?.total_pnl >= 0 ? '▲ +' : '▼ '}₹{portfolio?.total_pnl?.toFixed(2)}
           </div>
         </div>
         <div className="bg-card border border-border rounded-xl p-6">
