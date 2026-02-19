@@ -128,7 +128,7 @@ const DashboardLayout = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-card border-b border-border">
+          <div className="md:hidden bg-slate-900 border-b border-slate-700">
             <nav className="p-4 space-y-1">
               {navItems.map((item) => (
                 <NavLink
@@ -138,8 +138,8 @@ const DashboardLayout = () => {
                   className={({ isActive }) =>
                     `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800'
                     }`
                   }
                 >
