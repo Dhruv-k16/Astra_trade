@@ -134,6 +134,7 @@ const DashboardPage = () => {
             <div className="space-y-4">
               {portfolio?.holdings?.map((holding, index) => {
                 const holdingPnlPositive = holding.pnl >= 0;
+                const holdingPnlClass = holdingPnlPositive ? 'text-gain' : 'text-loss';
                 return (
                   <div
                     key={index}
@@ -149,10 +150,8 @@ const DashboardPage = () => {
                       <div className="font-mono font-semibold">
                         ₹{holding.current_value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
-                      <div className={`text-sm font-medium ${
-                        holdingPnlPositive ? 'text-success' : 'text-destructive'
-                      }`}>
-                        {holdingPnlPositive ? '+' : ''}₹{holding.pnl.toFixed(2)} ({holdingPnlPositive ? '+' : ''}{holding.pnl_percentage.toFixed(2)}%)
+                      <div className={`text-sm font-medium flex items-center justify-end gap-1 ${holdingPnlClass}`}>
+                        {holdingPnlPositive ? '▲' : '▼'} {holdingPnlPositive ? '+' : ''}₹{holding.pnl.toFixed(2)} ({holdingPnlPositive ? '+' : ''}{holding.pnl_percentage.toFixed(2)}%)
                       </div>
                     </div>
                   </div>
