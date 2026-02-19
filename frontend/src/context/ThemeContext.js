@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 
+// Static theme context - no theme switching
 const ThemeContext = createContext();
 
 export const useTheme = () => {
@@ -11,35 +12,11 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark'; // Default to dark (trading terminal)
-  });
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark', 'calm', 'high-contrast');
-    root.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    // Cycle through: dark -> calm -> light -> high-contrast -> dark
-    setTheme(prev => {
-      if (prev === 'dark') return 'calm';
-      if (prev === 'calm') return 'light';
-      if (prev === 'light') return 'high-contrast';
-      return 'dark';
-    });
-  };
-  
-  const setThemeMode = (mode) => {
-    if (['dark', 'calm', 'light', 'high-contrast'].includes(mode)) {
-      setTheme(mode);
-    }
-  };
+  // Fixed to dark theme only
+  const theme = 'dark';
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setThemeMode }}>
+    <ThemeContext.Provider value={{ theme }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -6,116 +6,48 @@
 
 @layer base {
   :root {
-    /* Modern Light Theme */
-    --background: 248 250 252;
-    --foreground: 15 23 42;
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
-    --primary: 99 102 241;        /* Indigo */
-    --primary-foreground: 255 255 255;
-    --secondary: 241 245 249;
-    --secondary-foreground: 15 23 42;
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
-    --accent: 6 182 212;          /* Cyan accent */
-    --accent-foreground: 15 23 42;
-    --destructive: 239 68 68;
-    --destructive-foreground: 255 255 255;
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 99 102 241;
+    /* Modern Dark Fintech Theme - Single Theme Only */
+    
+    /* Backgrounds */
+    --background: 2 6 23;           /* slate-950 - Main app background */
+    --card: 15 23 42;               /* slate-900 - Cards, nav, auth containers */
+    --card-hover: 30 41 59;         /* slate-800 - Hover states */
+    --input-bg: 30 41 59;           /* slate-800 - Input fields */
+    --border: 51 65 85;             /* slate-700 - Borders, dividers */
+    
+    /* Text Colors */
+    --foreground: 255 255 255;      /* white - Primary headings */
+    --text-secondary: 148 163 184;  /* slate-400 - Secondary text */
+    --text-tertiary: 203 213 225;   /* slate-300 - Tertiary text */
+    --text-muted: 100 116 139;      /* slate-500 - Placeholder, meta */
+    
+    /* Primary Accent (Blue/Indigo) */
+    --primary: 59 130 246;          /* blue-500 - Primary actions */
+    --primary-hover: 37 99 235;     /* blue-600 - Hover state */
+    --primary-dark: 29 78 216;      /* blue-700 - Active state */
+    --accent: 99 102 241;           /* indigo-500 - Secondary accent */
+    --accent-hover: 79 70 229;      /* indigo-600 - Accent hover */
+    
+    /* Success/Gains (Green) */
+    --gain: 52 211 153;             /* emerald-400 - Positive P&L */
+    --gain-strong: 16 185 129;      /* emerald-500 - Buy buttons */
+    
+    /* Error/Loss (Red) */
+    --loss: 248 113 113;            /* red-400 - Negative P&L */
+    --loss-strong: 239 68 68;       /* red-500 - Sell buttons */
+    --loss-dark: 220 38 38;         /* red-600 - Strong loss */
+    
+    /* Warning/Info (Amber/Yellow) */
+    --warning: 251 191 36;          /* amber-400 - Cash indicator */
+    --warning-strong: 245 158 11;   /* amber-500 - Warnings */
+    --highlight: 250 204 21;        /* yellow-400 - Trophy, rankings */
+    
+    /* Special (Purple) */
+    --special: 192 132 252;         /* purple-400 - Return % */
+    --special-strong: 168 85 247;   /* purple-500 - Invested value */
+    
+    /* Fixed Values */
     --radius: 0.75rem;
-    
-    /* Trading Colors - Modern Fintech */
-    --gain: 22 163 74;            /* Modern emerald green */
-    --loss: 239 68 68;             /* Modern red */
-    --neutral: 148 163 184;
-  }
-
-  .dark {
-    /* Modern Dark Theme - Professional Brokerage Style */
-    --background: 15 23 42;        /* Deep navy slate */
-    --foreground: 248 250 252;
-    --card: 30 41 59;              /* Slate gray cards */
-    --card-foreground: 248 250 252;
-    --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
-    --primary: 99 102 241;         /* Indigo */
-    --primary-foreground: 255 255 255;
-    --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
-    --accent: 6 182 212;           /* Cyan */
-    --accent-foreground: 255 255 255;
-    --destructive: 239 68 68;
-    --destructive-foreground: 255 255 255;
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 99 102 241;
-    
-    /* Trading Colors - High Visibility */
-    --gain: 34 197 94;            /* Bright emerald green */
-    --loss: 239 68 68;             /* Modern red */
-    --neutral: 148 163 184;
-  }
-  
-  .calm {
-    /* Calm Theme - Muted Pastels */
-    --background: 30 41 59;        /* Navy blue */
-    --foreground: 248 250 252;
-    --card: 51 65 85;
-    --card-foreground: 248 250 252;
-    --popover: 51 65 85;
-    --popover-foreground: 248 250 252;
-    --primary: 129 140 248;        /* Soft indigo */
-    --primary-foreground: 255 255 255;
-    --secondary: 71 85 105;
-    --secondary-foreground: 248 250 252;
-    --muted: 71 85 105;
-    --muted-foreground: 203 213 225;
-    --accent: 103 232 249;         /* Soft cyan */
-    --accent-foreground: 30 41 59;
-    --destructive: 248 113 113;
-    --destructive-foreground: 255 255 255;
-    --border: 71 85 105;
-    --input: 71 85 105;
-    --ring: 129 140 248;
-    
-    /* Trading Colors - Soft */
-    --gain: 52 211 153;           /* Soft emerald */
-    --loss: 248 113 113;           /* Soft red */
-    --neutral: 148 163 184;
-  }
-  
-  .high-contrast {
-    /* High Contrast Mode - Maximum Visibility */
-    --background: 0 0 0;           /* Pure black */
-    --foreground: 255 255 255;     /* Pure white */
-    --card: 23 23 23;
-    --card-foreground: 255 255 255;
-    --popover: 23 23 23;
-    --popover-foreground: 255 255 255;
-    --primary: 129 140 248;
-    --primary-foreground: 0 0 0;
-    --secondary: 38 38 38;
-    --secondary-foreground: 255 255 255;
-    --muted: 38 38 38;
-    --muted-foreground: 163 163 163;
-    --accent: 34 211 238;
-    --accent-foreground: 0 0 0;
-    --destructive: 255 71 87;
-    --destructive-foreground: 255 255 255;
-    --border: 64 64 64;
-    --input: 38 38 38;
-    --ring: 129 140 248;
-    
-    /* Trading Colors - Ultra Bright */
-    --gain: 74 222 128;           /* Ultra bright green */
-    --loss: 252 165 165;           /* Ultra bright red */
-    --neutral: 163 163 163;
   }
 }
 
@@ -125,12 +57,13 @@
   }
   
   body {
-    @apply bg-background text-foreground;
+    @apply bg-slate-950 text-white;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
   
   h1, h2, h3, h4, h5, h6 {
+    @apply text-white;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -142,80 +75,110 @@
 }
 
 @layer utilities {
-  .tabular-nums {
-    font-variant-numeric: tabular-nums;
+  /* Text Gradients */
+  .text-gradient {
+    @apply bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent;
   }
   
-  /* Trading Color Utilities */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent;
+  }
+  
+  /* Button Gradients */
+  .btn-gradient-primary {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500;
+  }
+  
+  /* Trading Colors */
   .text-gain {
-    color: rgb(var(--gain));
+    @apply text-emerald-400;
   }
+  
+  .text-gain-strong {
+    @apply text-emerald-500;
+  }
+  
   .text-loss {
-    color: rgb(var(--loss));
+    @apply text-red-400;
   }
+  
+  .text-loss-strong {
+    @apply text-red-500;
+  }
+  
   .bg-gain {
-    background-color: rgb(var(--gain));
+    @apply bg-emerald-500;
   }
+  
   .bg-loss {
-    background-color: rgb(var(--loss));
+    @apply bg-red-500;
   }
+  
   .border-gain {
-    border-color: rgb(var(--gain));
+    @apply border-emerald-500;
   }
+  
   .border-loss {
-    border-color: rgb(var(--loss));
+    @apply border-red-500;
   }
   
-  /* Modern Glassmorphism */
-  .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Card Styles */
+  .card {
+    @apply bg-slate-900 border border-slate-700 rounded-xl;
   }
   
-  /* Smooth transitions */
-  .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  .card-hover {
+    @apply hover:bg-slate-800 transition-colors;
   }
   
-  /* Modern shadows */
+  /* Input Styles */
+  .input {
+    @apply bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500;
+    @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none;
+  }
+  
+  /* Modern Shadows */
   .shadow-modern {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.2);
   }
   
   .shadow-modern-lg {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
-                0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 
+                0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Numeric Formatting */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Custom scrollbar - Modern */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  @apply bg-slate-900;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--muted-foreground) / 0.3);
-  border-radius: 4px;
+  @apply bg-slate-700 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--muted-foreground) / 0.5);
+  @apply bg-slate-600;
 }
 
-/* Animations */
+/* Price Update Animations */
 @keyframes pulse-gain {
   0%, 100% {
     background-color: transparent;
   }
   50% {
-    background-color: rgb(var(--gain) / 0.1);
+    background-color: rgba(52, 211, 153, 0.1);
   }
 }
 
@@ -224,7 +187,7 @@
     background-color: transparent;
   }
   50% {
-    background-color: rgb(var(--loss) / 0.1);
+    background-color: rgba(248, 113, 113, 0.1);
   }
 }
 
