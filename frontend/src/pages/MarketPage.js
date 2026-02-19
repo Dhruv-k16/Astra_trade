@@ -89,8 +89,23 @@ const MarketPage = () => {
     <div className="p-4 md:p-8 space-y-6" data-testid="market-page">
       <div>
         <h1 className="text-4xl font-bold">Market</h1>
-        <p className="text-muted-foreground mt-2">Search and trade NSE stocks</p>
+        <p className="text-muted-foreground mt-2">Search and trade NSE stocks with live prices</p>
       </div>
+      
+      {/* Connection Status */}
+      {connectionStatus !== 'connected' && (
+        <div className={`flex items-center gap-3 p-4 rounded-xl border ${
+          connectionStatus === 'error' ? 'bg-loss/10 border-loss' : 'bg-muted border-border'
+        }`}>
+          <WifiOff className="w-5 h-5" />
+          <div className="flex-1">
+            <div className="font-medium">{statusMessage}</div>
+            <div className="text-sm text-muted-foreground">
+              {connectionStatus === 'disconnected' ? 'Reconnecting to live feed...' : 'Using cached prices'}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="relative">
@@ -101,7 +116,7 @@ const MarketPage = () => {
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search stocks by symbol or name..."
-          className="w-full pl-12 pr-4 py-4 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-lg"
+          className="w-full pl-12 pr-4 py-4 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-lg shadow-modern"
         />
       </div>
 
@@ -110,11 +125,13 @@ const MarketPage = () => {
         {stocks.map((stock) => {
           const priceData = prices[stock.instrument_key];
           const currentPrice = priceData?.last_price || 0;
+          const changePercent = priceData?.change_percent || 0;
+          const isPositive = changePercent >= 0;
           
           return (
             <div
               key={stock.instrument_key}
-              className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all"
+              className="bg-card border border-border rounded-xl p-6 hover:shadow-modern-lg transition-all"
               data-testid={`stock-card-${stock.trading_symbol}`}
             >
               <div className="flex items-start justify-between mb-4">
@@ -122,6 +139,13 @@ const MarketPage = () => {
                   <h3 className="text-xl font-bold">{stock.trading_symbol}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-1">{stock.name}</p>
                 </div>
+                {priceData && (
+                  <div className={`text-xs font-medium px-2 py-1 rounded ${
+                    isPositive ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'
+                  }`}>
+                    {isPositive ? '▲' : '▼'} {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
+                  </div>
+                )}
               </div>
               
               <div className="mb-4">
@@ -129,7 +153,7 @@ const MarketPage = () => {
                   ₹{currentPrice.toFixed(2)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Last updated: {priceData?.timestamp ? new Date(priceData.timestamp).toLocaleTimeString() : 'N/A'}
+                  {priceData?.timestamp ? 'Live' : 'Cached'}
                 </div>
               </div>
 
@@ -137,21 +161,22 @@ const MarketPage = () => {
                 <button
                   onClick={() => openTradeModal(stock, 'BUY')}
                   data-testid={`buy-button-${stock.trading_symbol}`}
-                  className="flex-1 py-2 px-4 bg-gain text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium"
+                  className="flex-1 py-2.5 px-4 bg-gain text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium flex items-center justify-center gap-2"
                 >
-                  Buy ▲
+                  <TrendingUp className="w-4 h-4" /> Buy
                 </button>
                 <button
                   onClick={() => openTradeModal(stock, 'SELL')}
                   data-testid={`sell-button-${stock.trading_symbol}`}
-                  className="flex-1 py-2 px-4 bg-loss text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium"
+                  className="flex-1 py-2.5 px-4 bg-loss text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium flex items-center justify-center gap-2"
                 >
-                  Sell ▼
+                  <TrendingDown className="w-4 h-4" /> Sell
                 </button>
               </div>
             </div>
           );
         })}
+      </div>
       </div>
 
       {/* Trade Modal */}
