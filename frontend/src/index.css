@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,88 +6,116 @@
 
 @layer base {
   :root {
-    /* Light Theme - Calm Mode */
-    --background: 255 255 255;
+    /* Modern Light Theme */
+    --background: 248 250 252;
     --foreground: 15 23 42;
-    --card: 248 250 252;
+    --card: 255 255 255;
     --card-foreground: 15 23 42;
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
-    --primary: 37 99 235;
+    --primary: 99 102 241;        /* Indigo */
     --primary-foreground: 255 255 255;
     --secondary: 241 245 249;
     --secondary-foreground: 15 23 42;
     --muted: 241 245 249;
     --muted-foreground: 100 116 139;
-    --accent: 241 245 249;
+    --accent: 6 182 212;          /* Cyan accent */
     --accent-foreground: 15 23 42;
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
     --border: 226 232 240;
     --input: 226 232 240;
-    --ring: 37 99 235;
+    --ring: 99 102 241;
     --radius: 0.75rem;
     
-    /* Trading Colors - Standard Convention */
-    --gain: 34 197 94;        /* Green for gains/up */
-    --loss: 239 68 68;         /* Red for losses/down */
-    --neutral: 148 163 184;    /* Gray for neutral */
+    /* Trading Colors - Modern Fintech */
+    --gain: 22 163 74;            /* Modern emerald green */
+    --loss: 239 68 68;             /* Modern red */
+    --neutral: 148 163 184;
   }
 
   .dark {
-    /* Dark Theme - High Contrast Trading Terminal */
-    --background: 0 0 0;           /* Pure black */
-    --foreground: 255 255 255;      /* Pure white */
-    --card: 17 24 39;              /* Dark gray cards */
-    --card-foreground: 255 255 255;
-    --popover: 17 24 39;
-    --popover-foreground: 255 255 255;
-    --primary: 59 130 246;         /* Blue accent */
+    /* Modern Dark Theme - Professional Brokerage Style */
+    --background: 15 23 42;        /* Deep navy slate */
+    --foreground: 248 250 252;
+    --card: 30 41 59;              /* Slate gray cards */
+    --card-foreground: 248 250 252;
+    --popover: 30 41 59;
+    --popover-foreground: 248 250 252;
+    --primary: 99 102 241;         /* Indigo */
     --primary-foreground: 255 255 255;
-    --secondary: 31 41 55;
-    --secondary-foreground: 255 255 255;
-    --muted: 31 41 55;
-    --muted-foreground: 156 163 175;
-    --accent: 31 41 55;
+    --secondary: 51 65 85;
+    --secondary-foreground: 248 250 252;
+    --muted: 51 65 85;
+    --muted-foreground: 148 163 184;
+    --accent: 6 182 212;           /* Cyan */
     --accent-foreground: 255 255 255;
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
-    --border: 31 41 55;
-    --input: 31 41 55;
-    --ring: 59 130 246;
+    --border: 51 65 85;
+    --input: 51 65 85;
+    --ring: 99 102 241;
     
-    /* Trading Colors - High Contrast */
-    --gain: 34 197 94;        /* Bright green for gains */
-    --loss: 239 68 68;         /* Bright red for losses */
-    --neutral: 156 163 175;    /* Light gray for neutral */
+    /* Trading Colors - High Visibility */
+    --gain: 34 197 94;            /* Bright emerald green */
+    --loss: 239 68 68;             /* Modern red */
+    --neutral: 148 163 184;
   }
   
   .calm {
-    /* Calm Theme - Soft Colors for Long Sessions */
+    /* Calm Theme - Muted Pastels */
     --background: 30 41 59;        /* Navy blue */
     --foreground: 248 250 252;
     --card: 51 65 85;
     --card-foreground: 248 250 252;
     --popover: 51 65 85;
     --popover-foreground: 248 250 252;
-    --primary: 96 165 250;
+    --primary: 129 140 248;        /* Soft indigo */
     --primary-foreground: 255 255 255;
     --secondary: 71 85 105;
     --secondary-foreground: 248 250 252;
     --muted: 71 85 105;
     --muted-foreground: 203 213 225;
-    --accent: 71 85 105;
-    --accent-foreground: 248 250 252;
-    --destructive: 239 68 68;
+    --accent: 103 232 249;         /* Soft cyan */
+    --accent-foreground: 30 41 59;
+    --destructive: 248 113 113;
     --destructive-foreground: 255 255 255;
     --border: 71 85 105;
     --input: 71 85 105;
-    --ring: 96 165 250;
+    --ring: 129 140 248;
     
-    /* Trading Colors - Soft/Muted */
-    --gain: 38 166 154;       /* Soft teal green */
-    --loss: 239 83 80;         /* Muted red */
+    /* Trading Colors - Soft */
+    --gain: 52 211 153;           /* Soft emerald */
+    --loss: 248 113 113;           /* Soft red */
     --neutral: 148 163 184;
+  }
+  
+  .high-contrast {
+    /* High Contrast Mode - Maximum Visibility */
+    --background: 0 0 0;           /* Pure black */
+    --foreground: 255 255 255;     /* Pure white */
+    --card: 23 23 23;
+    --card-foreground: 255 255 255;
+    --popover: 23 23 23;
+    --popover-foreground: 255 255 255;
+    --primary: 129 140 248;
+    --primary-foreground: 0 0 0;
+    --secondary: 38 38 38;
+    --secondary-foreground: 255 255 255;
+    --muted: 38 38 38;
+    --muted-foreground: 163 163 163;
+    --accent: 34 211 238;
+    --accent-foreground: 0 0 0;
+    --destructive: 255 71 87;
+    --destructive-foreground: 255 255 255;
+    --border: 64 64 64;
+    --input: 38 38 38;
+    --ring: 129 140 248;
+    
+    /* Trading Colors - Ultra Bright */
+    --gain: 74 222 128;           /* Ultra bright green */
+    --loss: 252 165 165;           /* Ultra bright red */
+    --neutral: 163 163 163;
   }
 }
 
@@ -95,15 +123,21 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
+  
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
+  
   .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
   }
 }
 
@@ -131,4 +165,73 @@
   .border-loss {
     border-color: rgb(var(--loss));
   }
+  
+  /* Modern Glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Modern shadows */
+  .shadow-modern {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-modern-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+                0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Custom scrollbar - Modern */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--muted-foreground) / 0.5);
+}
+
+/* Animations */
+@keyframes pulse-gain {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgb(var(--gain) / 0.1);
+  }
+}
+
+@keyframes pulse-loss {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgb(var(--loss) / 0.1);
+  }
+}
+
+.animate-price-up {
+  animation: pulse-gain 0.5s ease-in-out;
+}
+
+.animate-price-down {
+  animation: pulse-loss 0.5s ease-in-out;
 }
