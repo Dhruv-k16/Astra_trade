@@ -95,12 +95,12 @@ const MarketPage = () => {
       {/* Connection Status */}
       {connectionStatus !== 'connected' && (
         <div className={`flex items-center gap-3 p-4 rounded-xl border ${
-          connectionStatus === 'error' ? 'bg-loss/10 border-loss' : 'bg-muted border-border'
+          connectionStatus === 'error' ? 'bg-red-900/30 border-red-700/50' : 'bg-slate-800/50 border-slate-700/50'
         }`}>
-          <WifiOff className="w-5 h-5" />
+          <WifiOff className="w-5 h-5 text-slate-400" />
           <div className="flex-1">
-            <div className="font-medium">{statusMessage}</div>
-            <div className="text-sm text-muted-foreground">
+            <div className="font-medium text-white">{statusMessage}</div>
+            <div className="text-sm text-slate-400">
               {connectionStatus === 'disconnected' ? 'Reconnecting to live feed...' : 'Using cached prices'}
             </div>
           </div>
@@ -109,14 +109,14 @@ const MarketPage = () => {
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
         <input
           data-testid="stock-search-input"
           type="text"
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search stocks by symbol or name..."
-          className="w-full pl-12 pr-4 py-4 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-lg shadow-modern"
+          className="w-full pl-12 pr-4 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-lg shadow-modern"
         />
       </div>
 
