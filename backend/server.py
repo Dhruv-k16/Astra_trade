@@ -305,10 +305,10 @@ async def get_multiple_prices(instrument_keys: str):
 async def place_trade(trade: TradeRequest, current_user: dict = Depends(get_current_user)):
     """Place a buy or sell order"""
     # Get current price
-    if trade.instrument_key not in price_cache:
+    if trade.instrument_key not in ws_manager.price_cache:
         raise HTTPException(status_code=404, detail="Stock price not available")
     
-    price = price_cache[trade.instrument_key]["last_price"]
+    price = ws_manager.price_cache[trade.instrument_key]["last_price"]
     
     # Get contest config
     config = await db.contest_config.find_one() or {"trading_active": True}
