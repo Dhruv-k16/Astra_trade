@@ -363,45 +363,45 @@ async def get_orders(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/leaderboard", response_model=List[LeaderboardEntry])
 async def get_leaderboard():
-    \"\"\"Get contest leaderboard\"\"\"
-    users = await db.users.find({\"role\": UserRole.USER}).to_list(100)
+    """Get contest leaderboard"""
+    users = await db.users.find({"role": UserRole.USER}).to_list(100)
     
     leaderboard_data = []
     
     for user in users:
-        user_id = user[\"id\"]
-        cash_balance = user.get(\"virtual_balance\", STARTING_CAPITAL)
+        user_id = user["id"]
+        cash_balance = user.get("virtual_balance", STARTING_CAPITAL)
         
         # Calculate portfolio value
-        holdings = await db.portfolio.find({\"user_id\": user_id}).to_list(100)
+        holdings = await db.portfolio.find({"user_id": user_id}).to_list(100)
         portfolio_value = cash_balance
         
         for h in holdings:
-            instrument_key = h[\"instrument_key\"]
-            current_price = price_cache.get(instrument_key, {}).get(\"last_price\", h[\"avg_price\"])
-            portfolio_value += current_price * h[\"quantity\"]
+            instrument_key = h["instrument_key"]
+            current_price = price_cache.get(instrument_key, {}).get("last_price", h["avg_price"])
+            portfolio_value += current_price * h["quantity"]
         
         return_pct = ((portfolio_value - STARTING_CAPITAL) / STARTING_CAPITAL) * 100
         
         leaderboard_data.append({
-            \"username\": user[\"username\"],
-            \"portfolio_value\": portfolio_value,
-            \"return_percentage\": return_pct,
-            \"trade_count\": user.get(\"trade_count\", 0)
+            "username": user["username"],
+            "portfolio_value": portfolio_value,
+            "return_percentage": return_pct,
+            "trade_count": user.get("trade_count", 0)
         })
     
     # Sort by return percentage (descending), then by trade count (ascending)
-    leaderboard_data.sort(key=lambda x: (-x[\"return_percentage\"], x[\"trade_count\"]))
+    leaderboard_data.sort(key=lambda x: (-x["return_percentage"], x["trade_count"]))
     
     # Add ranks
     result = []
     for idx, entry in enumerate(leaderboard_data, 1):
         result.append(LeaderboardEntry(
             rank=idx,
-            username=entry[\"username\"],
-            portfolio_value=entry[\"portfolio_value\"],
-            return_percentage=entry[\"return_percentage\"],
-            trade_count=entry[\"trade_count\"]
+            username=entry["username"],
+            portfolio_value=entry["portfolio_value"],
+            return_percentage=entry["return_percentage"],
+            trade_count=entry["trade_count"]
         ))
     
     return result
