@@ -142,16 +142,16 @@ const MarketPage = () => {
                 <button
                   onClick={() => openTradeModal(stock, 'BUY')}
                   data-testid={`buy-button-${stock.trading_symbol}`}
-                  className="flex-1 py-2 px-4 bg-success text-white rounded-lg hover:bg-success/90 transition-all active:scale-95 font-medium"
+                  className="flex-1 py-2 px-4 bg-gain text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium"
                 >
-                  Buy
+                  Buy ▲
                 </button>
                 <button
                   onClick={() => openTradeModal(stock, 'SELL')}
                   data-testid={`sell-button-${stock.trading_symbol}`}
-                  className="flex-1 py-2 px-4 bg-destructive text-white rounded-lg hover:bg-destructive/90 transition-all active:scale-95 font-medium"
+                  className="flex-1 py-2 px-4 bg-loss text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium"
                 >
-                  Sell
+                  Sell ▼
                 </button>
               </div>
             </div>
