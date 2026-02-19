@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Briefcase, TrendingUp, TrendingDown } from 'lucide-react';
+import { Briefcase, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 
 const PortfolioPage = () => {
   const { token } = useAuth();
