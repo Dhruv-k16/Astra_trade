@@ -46,6 +46,8 @@ const DashboardPage = () => {
   }
 
   const pnlPositive = portfolio?.total_pnl >= 0;
+  const pnlClass = pnlPositive ? 'text-gain' : 'text-loss';
+  const pnlIcon = pnlPositive ? TrendingUp : TrendingDown;
 
   return (
     <div className="p-4 md:p-8 space-y-6" data-testid="dashboard-page">
