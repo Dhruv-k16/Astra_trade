@@ -343,7 +343,7 @@ async def get_portfolio(current_user: dict = Depends(get_current_user)):
     
     for h in holdings_data:
         instrument_key = h["instrument_key"]
-        current_price = price_cache.get(instrument_key, {}).get("last_price", h["avg_price"])
+        current_price = ws_manager.price_cache.get(instrument_key, {}).get("last_price", h["avg_price"])
         
         invested = h["avg_price"] * h["quantity"]
         value = current_price * h["quantity"]
