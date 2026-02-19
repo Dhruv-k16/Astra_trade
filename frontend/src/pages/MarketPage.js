@@ -177,7 +177,6 @@ const MarketPage = () => {
           );
         })}
       </div>
-      </div>
 
       {/* Trade Modal */}
       {showTradeModal && (
