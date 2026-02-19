@@ -1,0 +1,168 @@
+{
+  "project_name": "Campus Trading Contest Platform",
+  "design_philosophy": {
+    "identity": "Modern Fintech Performance",
+    "core_principles": [
+      "Clarity over Decoration: Data is the hero.",
+      "Speed Perception: Interface must feel instant (optimistic UI).",
+      "Competitive Tension: Leaderboards and rankings should feel 'alive'.",
+      "Trust: Professional typography and consistent spacing build confidence."
+    ],
+    "theme_strategy": "Dual Theme (Light Default, Dark Toggle). Light mode is 'Day Trading' (Professional, Crisp). Dark mode is 'Night Market' (Immersive, Contrast)."
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Manrope, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+      "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+      "h3": "text-2xl font-semibold",
+      "h4": "text-xl font-medium",
+      "body_lg": "text-lg leading-relaxed",
+      "body_default": "text-base leading-relaxed",
+      "caption": "text-sm text-muted-foreground",
+      "mono_price": "font-mono tracking-tighter tabular-nums"
+    },
+    "usage_rules": [
+      "Use 'Manrope' for all page titles and section headers.",
+      "Use 'Inter' for all UI text, labels, and paragraphs.",
+      "Use 'JetBrains Mono' EXCLUSIVELY for stock prices, percentages, P&L, and account balances.",
+      "Positive values: text-emerald-600 (Light) / text-emerald-500 (Dark).",
+      "Negative values: text-red-600 (Light) / text-red-500 (Dark)."
+    ]
+  },
+  "colors": {
+    "palette": {
+      "light": {
+        "background": "#F8FAFC",
+        "surface": "#FFFFFF",
+        "surface_highlight": "#F1F5F9",
+        "text_primary": "#0F172A",
+        "text_secondary": "#64748B",
+        "border": "#E2E8F0",
+        "primary": "#2563EB",
+        "primary_foreground": "#FFFFFF"
+      },
+      "dark": {
+        "background": "#020617",
+        "surface": "#0F172A",
+        "surface_highlight": "#1E293B",
+        "text_primary": "#F8FAFC",
+        "text_secondary": "#94A3B8",
+        "border": "#1E293B",
+        "primary": "#3B82F6",
+        "primary_foreground": "#FFFFFF"
+      },
+      "semantic": {
+        "success": "#10B981",
+        "danger": "#EF4444",
+        "warning": "#F59E0B",
+        "info": "#3B82F6",
+        "profit_glow": "0 0 20px rgba(16, 185, 129, 0.2)",
+        "loss_glow": "0 0 20px rgba(239, 68, 68, 0.2)"
+      }
+    },
+    "gradients": {
+      "hero_light": "linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%)",
+      "hero_dark": "linear-gradient(135deg, #0F172A 0%, #020617 100%)",
+      "accent_mesh": "radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%)"
+    }
+  },
+  "layout_system": {
+    "grid_structure": "Bento Grid Mode B (High Density)",
+    "spacing": {
+      "container_padding": "p-4 md:p-6 lg:p-8",
+      "card_gap": "gap-4 md:gap-6",
+      "section_gap": "gap-8 md:gap-12"
+    },
+    "containers": {
+      "dashboard_grid": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "sidebar_layout": "flex h-screen overflow-hidden",
+      "main_content": "flex-1 overflow-y-auto"
+    }
+  },
+  "components": {
+    "StockCard": {
+      "style": "Clean Surface",
+      "props": "bg-card border border-border shadow-sm rounded-xl p-4 md:p-6 transition-all hover:shadow-md hover:border-primary/20",
+      "features": "Ticker Top-Left, Mini-Chart Bottom, Price Big Right"
+    },
+    "LeaderboardRow": {
+      "style": "List Item",
+      "props": "flex items-center justify-between p-4 border-b border-border last:border-0 hover:bg-muted/50 transition-colors",
+      "rank_badge": "Rank 1-3 get Gold/Silver/Bronze colored rings or icons. Others get simple numbers."
+    },
+    "OrderForm": {
+      "style": "Functional Panel",
+      "props": "bg-card border border-border rounded-xl shadow-lg p-6",
+      "tabs": "Toggle Buy (Green Theme) / Sell (Red Theme)"
+    },
+    "MarketStatus": {
+      "style": "Glassmorphism Bar",
+      "props": "sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-border flex items-center px-6 h-14"
+    },
+    "Button": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm h-10 px-4 py-2 rounded-lg font-medium transition-all active:scale-95",
+      "buy": "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm hover:shadow-emerald-500/20",
+      "sell": "bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-red-500/20"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "usage": "Use for 'Market Status Bar' and 'Floating Action Buttons' (Mobile).",
+      "class": "backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border border-white/20"
+    },
+    "micro_interactions": {
+      "hover": "Cards lift slightly (-translate-y-1) on hover.",
+      "click": "Buttons scale down (scale-95) on press.",
+      "live_pulse": "Live prices flash green/red background briefly on update."
+    },
+    "charts": {
+      "library": "Recharts",
+      "style": "Minimalist. Remove grid lines (or make them very subtle). Use gradients for area fills. Tooltip must be custom styled (dark bg, white text)."
+    }
+  },
+  "media_assets": {
+    "image_urls": {
+      "login_background": {
+        "url": "https://images.pexels.com/photos/28428592/pexels-photo-28428592.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Abstract Blue Cubes Finance Background",
+        "description": "Use as a subtle background for the Login/Signup page with an overlay."
+      },
+      "bull_bear_illustration": {
+        "url": "https://images.unsplash.com/photo-1623271922359-f638ddf72e41?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Bull Statue",
+        "description": "Use in the 'About' or 'Rules' modal to represent the market."
+      },
+      "leaderboard_trophy": {
+        "url": "https://images.pexels.com/photos/6565252/pexels-photo-6565252.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Trophy Icon",
+        "description": "Use near the top ranked user on the dashboard."
+      },
+      "market_chart_generic": {
+        "url": "https://images.pexels.com/photos/10628030/pexels-photo-10628030.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Market Chart",
+        "description": "Use for empty states or generic market visualization."
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Ensure 'lucide-react', 'recharts', 'framer-motion', 'clsx', 'tailwind-merge' are installed.",
+    "2. THEME: Implement the 'ThemeProvider' from 'next-themes' wrapping the app to handle light/dark mode toggling.",
+    "3. LAYOUT: Create a persistent 'DashboardLayout' component with Sidebar (Desktop) / BottomNav (Mobile) and TopBar.",
+    "4. COMPONENTS: Build 'StockCard', 'LeaderboardTable', 'TradeForm' as reusable components.",
+    "5. DATA: Use 'JetBrains Mono' for ALL financial numbers. Ensure tabular-nums is on to prevent jittering prices.",
+    "6. COLOR: Do NOT use random colors. Stick to the Slate (Grey) + Blue (Primary) + Emerald/Red (Semantic) palette.",
+    "7. TESTING: Add 'data-testid' to all interactive elements (buttons, inputs, trade toggles)."
+  ],
+  "universal_guidelines": [
+    "Avoid gradients for backgrounds unless specified.",
+    "Never center align the entire app.",
+    "Use layered shadows for depth.",
+    "All interactive elements must have a hover state.",
+    "Respect 'prefers-reduced-motion'."
+  ]
+}
