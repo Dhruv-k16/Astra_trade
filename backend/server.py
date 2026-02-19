@@ -504,6 +504,6 @@ async def unfreeze_trading(admin: dict = Depends(verify_admin)):
 # Include router
 app.include_router(api_router)
 
-@app.get(\"/health\")
+@app.get("/health")
 async def health_check():
     return {\"status\": \"healthy\", \"service\": \"campus-trading-platform\"}
