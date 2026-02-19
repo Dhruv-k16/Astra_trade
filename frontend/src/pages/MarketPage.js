@@ -131,17 +131,17 @@ const MarketPage = () => {
           return (
             <div
               key={stock.instrument_key}
-              className="bg-card border border-border rounded-xl p-6 hover:shadow-modern-lg transition-all"
+              className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/70 hover:shadow-modern-lg transition-all"
               data-testid={`stock-card-${stock.trading_symbol}`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold">{stock.trading_symbol}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-1">{stock.name}</p>
+                  <h3 className="text-xl font-bold text-white">{stock.trading_symbol}</h3>
+                  <p className="text-sm text-slate-400 line-clamp-1">{stock.name}</p>
                 </div>
                 {priceData && (
-                  <div className={`text-xs font-medium px-2 py-1 rounded ${
-                    isPositive ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'
+                  <div className={`text-xs font-medium px-2 py-1 rounded flex items-center gap-1 ${
+                    isPositive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
                   }`}>
                     {isPositive ? '▲' : '▼'} {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
                   </div>
@@ -149,10 +149,11 @@ const MarketPage = () => {
               </div>
               
               <div className="mb-4">
-                <div className="text-3xl font-bold font-mono tabular-nums">
+                <div className="text-3xl font-bold font-mono tabular-nums text-white">
                   ₹{currentPrice.toFixed(2)}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                  <div className={`w-2 h-2 rounded-full ${priceData?.timestamp ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
                   {priceData?.timestamp ? 'Live' : 'Cached'}
                 </div>
               </div>
@@ -161,14 +162,14 @@ const MarketPage = () => {
                 <button
                   onClick={() => openTradeModal(stock, 'BUY')}
                   data-testid={`buy-button-${stock.trading_symbol}`}
-                  className="flex-1 py-2.5 px-4 bg-gain text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg transition-all active:scale-95 font-medium flex items-center justify-center gap-2 shadow-lg"
                 >
                   <TrendingUp className="w-4 h-4" /> Buy
                 </button>
                 <button
                   onClick={() => openTradeModal(stock, 'SELL')}
                   data-testid={`sell-button-${stock.trading_symbol}`}
-                  className="flex-1 py-2.5 px-4 bg-loss text-white rounded-lg hover:opacity-90 transition-all active:scale-95 font-medium flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-400 text-white rounded-lg transition-all active:scale-95 font-medium flex items-center justify-center gap-2 shadow-lg"
                 >
                   <TrendingDown className="w-4 h-4" /> Sell
                 </button>
