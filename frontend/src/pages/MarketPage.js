@@ -181,22 +181,22 @@ const MarketPage = () => {
 
       {/* Trade Modal */}
       {showTradeModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6 shadow-xl" data-testid="trade-modal">
-            <h2 className="text-2xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-modern-lg" data-testid="trade-modal">
+            <h2 className="text-2xl font-bold mb-4 text-white">
               {tradeType === 'BUY' ? 'Buy' : 'Sell'} {selectedStock?.trading_symbol}
             </h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Current Price</label>
-                <div className="text-2xl font-bold font-mono">
+                <label className="block text-sm font-medium text-slate-300 mb-2">Current Price</label>
+                <div className="text-2xl font-bold font-mono text-white">
                   ₹{prices[selectedStock?.instrument_key]?.last_price?.toFixed(2)}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Quantity</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Quantity</label>
                 <input
                   data-testid="quantity-input"
                   type="number"
@@ -204,15 +204,15 @@ const MarketPage = () => {
                   onChange={(e) => setQuantity(e.target.value)}
                   min="1"
                   placeholder="Enter quantity"
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
                 />
               </div>
 
               {quantity > 0 && (
-                <div className="bg-muted p-4 rounded-lg">
+                <div className="bg-slate-800/50 border border-slate-700/50 p-4 rounded-lg">
                   <div className="flex justify-between text-sm">
-                    <span>Total Amount:</span>
-                    <span className="font-bold font-mono">
+                    <span className="text-slate-400">Total Amount:</span>
+                    <span className="font-bold font-mono text-white">
                       ₹{(prices[selectedStock?.instrument_key]?.last_price * quantity).toFixed(2)}
                     </span>
                   </div>
@@ -223,7 +223,7 @@ const MarketPage = () => {
             <div className="flex space-x-3 mt-6">
               <button
                 onClick={() => setShowTradeModal(false)}
-                className="flex-1 py-3 px-4 border border-border rounded-lg hover:bg-muted transition-all font-medium"
+                className="flex-1 py-3 px-4 border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-all font-medium"
               >
                 Cancel
               </button>
@@ -231,8 +231,8 @@ const MarketPage = () => {
                 onClick={executeTrade}
                 disabled={loading}
                 data-testid="confirm-trade-button"
-                className={`flex-1 py-3 px-4 rounded-lg text-white font-medium transition-all disabled:opacity-50 ${
-                  tradeType === 'BUY' ? 'bg-gain hover:opacity-90' : 'bg-loss hover:opacity-90'
+                className={`flex-1 py-3 px-4 rounded-lg text-white font-medium transition-all disabled:opacity-50 shadow-lg ${
+                  tradeType === 'BUY' ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-red-500 hover:bg-red-400'
                 }`}
               >
                 {loading ? 'Processing...' : `Confirm ${tradeType} ${tradeType === 'BUY' ? '▲' : '▼'}`}
