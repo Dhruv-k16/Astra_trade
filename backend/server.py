@@ -410,7 +410,7 @@ async def get_leaderboard():
         
         for h in holdings:
             instrument_key = h["instrument_key"]
-            current_price = price_cache.get(instrument_key, {}).get("last_price", h["avg_price"])
+            current_price = ws_manager.price_cache.get(instrument_key, {}).get("last_price", h["avg_price"])
             portfolio_value += current_price * h["quantity"]
         
         return_pct = ((portfolio_value - STARTING_CAPITAL) / STARTING_CAPITAL) * 100
