@@ -46,38 +46,69 @@ const PortfolioPage = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-xl p-6">
-          <div className="text-sm text-muted-foreground mb-1">Total Value</div>
-          <div className="text-2xl font-bold font-mono">
+        <div className="bg-gradient-to-br from-blue-900/30 to-slate-900/50 border border-blue-700/30 rounded-xl p-6 shadow-modern">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-slate-400">Total Value</div>
+            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+              <Briefcase className="w-5 h-5 text-blue-400" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold font-mono text-white">
             ₹{portfolio?.current_value?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-6">
-          <div className="text-sm text-muted-foreground mb-1">Invested</div>
-          <div className="text-2xl font-bold font-mono">
+        
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 rounded-xl p-6 shadow-modern">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-slate-400">Invested</div>
+            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-purple-400" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold font-mono text-white">
             ₹{portfolio?.invested_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
           </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-6">
-          <div className="text-sm text-muted-foreground mb-1">Total P&L</div>
+        
+        <div className={`bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 rounded-xl p-6 shadow-modern ${
+          portfolio?.total_pnl >= 0 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-red-500'
+        }`}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-slate-400">Total P&L</div>
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              portfolio?.total_pnl >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20'
+            }`}>
+              {portfolio?.total_pnl >= 0 ? (
+                <TrendingUp className="w-5 h-5 text-emerald-400" />
+              ) : (
+                <TrendingDown className="w-5 h-5 text-red-400" />
+              )}
+            </div>
+          </div>
           <div className={`text-2xl font-bold font-mono ${
-            portfolio?.total_pnl >= 0 ? 'text-gain' : 'text-loss'
+            portfolio?.total_pnl >= 0 ? 'text-emerald-400' : 'text-red-400'
           }`}>
             {portfolio?.total_pnl >= 0 ? '▲ +' : '▼ '}₹{portfolio?.total_pnl?.toFixed(2)}
           </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-6">
-          <div className="text-sm text-muted-foreground mb-1">Cash Balance</div>
-          <div className="text-2xl font-bold font-mono">
+        
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 rounded-xl p-6 shadow-modern">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-slate-400">Cash Balance</div>
+            <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-amber-400" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold font-mono text-white">
             ₹{portfolio?.cash_balance?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
       </div>
 
       {/* Holdings Table */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <div className="p-6 border-b border-border">
-          <h2 className="text-2xl font-semibold">Holdings</h2>
+      <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl overflow-hidden shadow-modern">
+        <div className="p-6 border-b border-slate-700/50">
+          <h2 className="text-2xl font-semibold text-white">Holdings</h2>
         </div>
         {portfolio?.holdings?.length === 0 ? (
           <div className="p-12 text-center">
