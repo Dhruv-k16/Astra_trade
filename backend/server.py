@@ -295,8 +295,8 @@ async def get_multiple_prices(instrument_keys: str):
     keys = instrument_keys.split(",")
     prices = {}
     for key in keys:
-        if key in price_cache:
-            prices[key] = price_cache[key]
+        if key in ws_manager.price_cache:
+            prices[key] = ws_manager.price_cache[key]
     return {"prices": prices}
 
 # ============= TRADING =============
