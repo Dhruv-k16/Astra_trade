@@ -91,19 +91,15 @@ const DashboardPage = () => {
 
         {/* Total P&L */}
         <div className={`bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow ${
-          pnlPositive ? 'border-l-4 border-l-success' : 'border-l-4 border-l-destructive'
+          pnlPositive ? 'border-l-4 border-l-gain' : 'border-l-4 border-l-loss'
         }`}>
           <div className="text-sm text-muted-foreground mb-2">Total P&L</div>
-          <div className={`text-3xl font-bold font-mono tabular-nums flex items-center ${
-            pnlPositive ? 'text-success' : 'text-destructive'
-          }`}>
+          <div className={`text-3xl font-bold font-mono tabular-nums flex items-center gap-2 ${pnlClass}`}>
             {pnlPositive ? '+' : ''}₹{portfolio?.total_pnl?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            {pnlPositive ? <TrendingUp className="w-6 h-6 ml-2" /> : <TrendingDown className="w-6 h-6 ml-2" />}
+            {React.createElement(pnlIcon, { className: "w-6 h-6" })}
           </div>
-          <div className={`mt-2 text-sm font-medium ${
-            pnlPositive ? 'text-success' : 'text-destructive'
-          }`}>
-            {pnlPositive ? '+' : ''}{portfolio?.total_pnl_percentage?.toFixed(2)}%
+          <div className={`mt-2 text-sm font-medium flex items-center gap-1 ${pnlClass}`}>
+            {pnlPositive ? '▲' : '▼'} {pnlPositive ? '+' : ''}{portfolio?.total_pnl_percentage?.toFixed(2)}%
           </div>
         </div>
 
