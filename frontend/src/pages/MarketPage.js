@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Search, TrendingUp, TrendingDown, ShoppingCart, DollarSign } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, ShoppingCart, DollarSign, WifiOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePriceWebSocket } from '../hooks/usePriceWebSocket';
 
 const MarketPage = () => {
   const { token } = useAuth();
@@ -13,7 +14,9 @@ const MarketPage = () => {
   const [tradeType, setTradeType] = useState('BUY');
   const [quantity, setQuantity] = useState('');
   const [loading, setLoading] = useState(false);
-  const [prices, setPrices] = useState({});
+  
+  // Use WebSocket for real-time prices
+  const { prices, connectionStatus, statusMessage, subscribe, unsubscribe } = usePriceWebSocket();
 
   const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -22,12 +25,16 @@ const MarketPage = () => {
   }, []);
 
   useEffect(() => {
+    // Subscribe to all visible stocks
     if (stocks.length > 0) {
-      fetchPrices();
-      const interval = setInterval(fetchPrices, 15000);
-      return () => clearInterval(interval);
+      const instrumentKeys = stocks.map(s => s.instrument_key);
+      subscribe(instrumentKeys);
+      
+      return () => {
+        unsubscribe(instrumentKeys);
+      };
     }
-  }, [stocks]);
+  }, [stocks, subscribe, unsubscribe]);
 
   const searchStocks = async (query) => {
     try {
