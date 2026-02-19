@@ -45,18 +45,6 @@ const MarketPage = () => {
     }
   };
 
-  const fetchPrices = async () => {
-    try {
-      const keys = stocks.map(s => s.instrument_key).join(',');
-      if (keys) {
-        const response = await axios.get(`${API}/stocks/prices?instrument_keys=${keys}`);
-        setPrices(response.data.prices);
-      }
-    } catch (error) {
-      console.error('Failed to fetch prices:', error);
-    }
-  };
-
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
