@@ -248,6 +248,39 @@ async def search_stocks(q: str = ""):
 
 # ============= STOCK PRICES =============
 
+@api_router.websocket("/ws/prices")
+async def websocket_prices(websocket: WebSocket):
+    """WebSocket endpoint for real-time price updates"""
+    await ws_manager.connect(websocket)
+    
+    try:
+        while True:
+            # Receive subscription requests from client
+            data = await websocket.receive_json()
+            
+            if data.get("action") == "subscribe":
+                instrument_keys = data.get("instruments", [])
+                await ws_manager.subscribe(instrument_keys)
+                
+                # Send current cached prices immediately
+                for key in instrument_keys:
+                    if key in ws_manager.price_cache:
+                        await websocket.send_json({
+                            "type": "price_update",
+                            "instrument_key": key,
+                            "data": ws_manager.price_cache[key]
+                        })
+            
+            elif data.get("action") == "unsubscribe":
+                instrument_keys = data.get("instruments", [])
+                await ws_manager.unsubscribe(instrument_keys)
+                
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        ws_manager.disconnect(websocket)
+
 @api_router.get("/stocks/price/{instrument_key}")
 async def get_stock_price(instrument_key: str):
     """Get current price for a stock"""
