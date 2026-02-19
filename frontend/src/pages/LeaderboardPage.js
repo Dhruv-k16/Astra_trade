@@ -86,10 +86,10 @@ const LeaderboardPage = () => {
                   <div className="text-2xl font-bold font-mono tabular-nums">
                     ₹{entry.portfolio_value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </div>
-                  <div className={`text-lg font-semibold font-mono ${
-                    returnPositive ? 'text-success' : 'text-destructive'
+                  <div className={`text-lg font-semibold font-mono flex items-center justify-end gap-1 ${
+                    returnPositive ? 'text-gain' : 'text-loss'
                   }`}>
-                    {returnPositive ? '+' : ''}{entry.return_percentage.toFixed(2)}%
+                    {returnPositive ? '▲' : '▼'} {returnPositive ? '+' : ''}{entry.return_percentage.toFixed(2)}%
                   </div>
                 </div>
               </div>
