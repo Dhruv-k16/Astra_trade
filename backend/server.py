@@ -69,19 +69,6 @@ async def initialize_default_admin():
         await db.users.insert_one(admin_user)
         logger.info("Default admin user created: admin@campus.edu / Admin@123")
 
-async def update_sample_prices():
-    """Update sample prices with random fluctuations"""
-    import random
-    for key in price_cache:
-        current_price = price_cache[key]["last_price"]
-        # Random price movement between -1% to +1%
-        change_percent = random.uniform(-0.01, 0.01)
-        new_price = current_price * (1 + change_percent)
-        price_cache[key] = {
-            "last_price": round(new_price, 2),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
