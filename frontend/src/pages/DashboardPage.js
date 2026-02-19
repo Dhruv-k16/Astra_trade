@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { TrendingUp, TrendingDown, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, AlertCircle, CheckCircle, Briefcase, DollarSign } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const DashboardPage = () => {
