@@ -28,15 +28,9 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Price cache
-price_cache = {}
-
 # Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Scheduler for background tasks
-scheduler = BackgroundScheduler()
 
 # Sample NSE stocks (in production, this would come from Upstox API)
 SAMPLE_STOCKS = [
