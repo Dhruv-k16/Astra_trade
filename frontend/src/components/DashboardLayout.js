@@ -127,12 +127,15 @@ const DashboardLayout = () => {
               <button
                 onClick={toggleTheme}
                 data-testid="theme-toggle"
-                className="p-2 rounded-lg hover:bg-muted transition-all active:scale-95"
+                className="p-2 rounded-lg hover:bg-muted transition-all active:scale-95 flex items-center gap-2"
+                title={`Current: ${theme.charAt(0).toUpperCase() + theme.slice(1)} Theme`}
               >
                 {theme === 'light' ? (
-                  <Moon className="w-5 h-5" />
+                  <><Moon className="w-5 h-5" /> <span className="text-xs hidden md:inline">Dark</span></>
+                ) : theme === 'dark' ? (
+                  <><Sun className="w-5 h-5" /> <span className="text-xs hidden md:inline">Calm</span></>
                 ) : (
-                  <Sun className="w-5 h-5" />
+                  <><Sun className="w-5 h-5" /> <span className="text-xs hidden md:inline">Light</span></>
                 )}
               </button>
             </div>
