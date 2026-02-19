@@ -12,22 +12,33 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'light';
+    return localStorage.getItem('theme') || 'dark'; // Default to dark (trading terminal)
   });
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
+    root.classList.remove('light', 'dark', 'calm');
     root.classList.add(theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    // Cycle through: dark -> calm -> light -> dark
+    setTheme(prev => {
+      if (prev === 'dark') return 'calm';
+      if (prev === 'calm') return 'light';
+      return 'dark';
+    });
+  };
+  
+  const setThemeMode = (mode) => {
+    if (['dark', 'calm', 'light'].includes(mode)) {
+      setTheme(mode);
+    }
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setThemeMode }}>
       {children}
     </ThemeContext.Provider>
   );
