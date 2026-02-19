@@ -154,16 +154,16 @@ const DashboardPage = () => {
                 return (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 transition-colors"
                   >
                     <div className="flex-1">
-                      <div className="font-semibold text-lg">{holding.trading_symbol}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-semibold text-lg text-white">{holding.trading_symbol}</div>
+                      <div className="text-sm text-slate-400">
                         {holding.quantity} shares @ ₹{holding.avg_price.toFixed(2)}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-mono font-semibold">
+                      <div className="font-mono font-semibold text-white">
                         ₹{holding.current_value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                       <div className={`text-sm font-medium flex items-center justify-end gap-1 ${holdingPnlClass}`}>
