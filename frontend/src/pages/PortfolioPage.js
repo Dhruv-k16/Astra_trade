@@ -112,42 +112,42 @@ const PortfolioPage = () => {
         </div>
         {portfolio?.holdings?.length === 0 ? (
           <div className="p-12 text-center">
-            <Briefcase className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground">No holdings yet. Start trading to build your portfolio.</p>
+            <Briefcase className="w-16 h-16 mx-auto text-slate-600 mb-4" />
+            <p className="text-slate-400">No holdings yet. Start trading to build your portfolio.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-muted/50">
+              <thead className="bg-slate-800/50">
                 <tr>
-                  <th className="text-left p-4 font-semibold">Symbol</th>
-                  <th className="text-right p-4 font-semibold">Quantity</th>
-                  <th className="text-right p-4 font-semibold">Avg Price</th>
-                  <th className="text-right p-4 font-semibold">Current Price</th>
-                  <th className="text-right p-4 font-semibold">Invested</th>
-                  <th className="text-right p-4 font-semibold">Current Value</th>
-                  <th className="text-right p-4 font-semibold">P&L</th>
-                  <th className="text-right p-4 font-semibold">P&L %</th>
+                  <th className="text-left p-4 font-semibold text-slate-300">Symbol</th>
+                  <th className="text-right p-4 font-semibold text-slate-300">Quantity</th>
+                  <th className="text-right p-4 font-semibold text-slate-300">Avg Price</th>
+                  <th className="text-right p-4 font-semibold text-slate-300">Current Price</th>
+                  <th className="text-right p-4 font-semibold text-slate-300">Invested</th>
+                  <th className="text-right p-4 font-semibold text-slate-300">Current Value</th>
+                  <th className="text-right p-4 font-semibold text-slate-300">P&L</th>
+                  <th className="text-right p-4 font-semibold text-slate-300">P&L %</th>
                 </tr>
               </thead>
               <tbody>
                 {portfolio?.holdings?.map((holding, index) => {
                   const pnlPositive = holding.pnl >= 0;
                   return (
-                    <tr key={index} className="border-t border-border hover:bg-muted/30 transition-colors">
-                      <td className="p-4 font-semibold">{holding.trading_symbol}</td>
-                      <td className="p-4 text-right font-mono">{holding.quantity}</td>
-                      <td className="p-4 text-right font-mono">₹{holding.avg_price.toFixed(2)}</td>
-                      <td className="p-4 text-right font-mono">₹{holding.current_price.toFixed(2)}</td>
-                      <td className="p-4 text-right font-mono">₹{holding.invested.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                      <td className="p-4 text-right font-mono">₹{holding.current_value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                    <tr key={index} className="border-t border-slate-700/50 hover:bg-slate-800/30 transition-colors">
+                      <td className="p-4 font-semibold text-white">{holding.trading_symbol}</td>
+                      <td className="p-4 text-right font-mono text-slate-300">{holding.quantity}</td>
+                      <td className="p-4 text-right font-mono text-slate-300">₹{holding.avg_price.toFixed(2)}</td>
+                      <td className="p-4 text-right font-mono text-slate-300">₹{holding.current_price.toFixed(2)}</td>
+                      <td className="p-4 text-right font-mono text-slate-300">₹{holding.invested.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                      <td className="p-4 text-right font-mono text-white">₹{holding.current_value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                       <td className={`p-4 text-right font-mono font-semibold ${
-                        pnlPositive ? 'text-gain' : 'text-loss'
+                        pnlPositive ? 'text-emerald-400' : 'text-red-400'
                       }`}>
                         {pnlPositive ? '▲ +' : '▼ '}₹{holding.pnl.toFixed(2)}
                       </td>
                       <td className={`p-4 text-right font-mono font-semibold ${
-                        pnlPositive ? 'text-gain' : 'text-loss'
+                        pnlPositive ? 'text-emerald-400' : 'text-red-400'
                       }`}>
                         {pnlPositive ? '+' : ''}{holding.pnl_percentage.toFixed(2)}%
                       </td>
