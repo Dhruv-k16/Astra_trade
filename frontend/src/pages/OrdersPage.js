@@ -74,7 +74,7 @@ const OrdersPage = () => {
                       </td>
                       <td className="p-4">
                         <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full font-medium text-sm ${
-                          isBuy ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+                          isBuy ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'
                         }`}>
                           {isBuy ? <ArrowUpCircle className="w-4 h-4" /> : <ArrowDownCircle className="w-4 h-4" />}
                           <span>{order.trade_type}</span>
