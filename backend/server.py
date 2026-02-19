@@ -283,9 +283,9 @@ async def websocket_prices(websocket: WebSocket):
 
 @api_router.get("/stocks/price/{instrument_key}")
 async def get_stock_price(instrument_key: str):
-    """Get current price for a stock"""
-    if instrument_key in price_cache:
-        return price_cache[instrument_key]
+    """Get current price for a stock (fallback for non-WebSocket clients)"""
+    if instrument_key in ws_manager.price_cache:
+        return ws_manager.price_cache[instrument_key]
     else:
         raise HTTPException(status_code=404, detail="Price not found")
 
