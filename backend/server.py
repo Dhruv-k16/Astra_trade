@@ -32,6 +32,11 @@ db = client[os.environ['DB_NAME']]
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("server:app", host="0.0.0.0", port=port)
+
 # Sample NSE stocks (in production, this would come from Upstox API)
 SAMPLE_STOCKS = [
     {"instrument_key": "NSE_EQ|INE002A01018", "trading_symbol": "RELIANCE", "name": "Reliance Industries Ltd", "segment": "NSE_EQ", "exchange": "NSE", "instrument_type": "EQ"},
