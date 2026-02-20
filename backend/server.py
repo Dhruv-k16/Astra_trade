@@ -106,6 +106,11 @@ app.add_middleware(
 
 # ============= AUTHENTICATION ROUTES =============
 
+@api_router.get("/auth/callback")
+async def upstox_callback(code: str):
+    return {"authorization_code": code}
+
+
 @api_router.post("/auth/register", response_model=Token)
 async def register(user_data: UserCreate):
     """Register a new user"""
