@@ -12,16 +12,22 @@ import uuid
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
-
 from models import *
 from auth import get_password_hash, verify_password, create_access_token, get_current_user
 from market_timing import get_market_status, is_market_open, get_current_ist_time
 from trade_engine import validate_trade, execute_trade
 from websocket_manager import ws_manager
 import requests
+import httpx
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+UPSTOX_CLIENT_ID = os.getenv("UPSTOX_CLIENT_ID")
+UPSTOX_CLIENT_SECRET = os.getenv("UPSTOX_CLIENT_SECRET")
+UPSTOX_REDIRECT_URI = os.getenv("UPSTOX_REDIRECT_URI")
+
+UPSTOX_TOKEN_URL = "https://api.upstox.com/v2/login/authorization/token"
 
 # Configuration
 STARTING_CAPITAL = 1000000
@@ -105,27 +111,31 @@ app.add_middleware(
 
 @api_router.get("/auth/callback")
 async def upstox_callback(code: str):
-    token_url = "https://api.upstox.com/v2/login/authorization/token"
-    
-    payload = {
-        "code": code,
-        "client_id": os.environ["UPSTOX_API_KEY"],
-        "client_secret": os.environ["UPSTOX_API_SECRET"],
-        "redirect_uri": os.environ["UPSTOX_REDIRECT_URI"],
-        "grant_type": "authorization_code"
-    }
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            UPSTOX_TOKEN_URL,
+            data={
+                "code": code,
+                "client_id": UPSTOX_CLIENT_ID,
+                "client_secret": UPSTOX_CLIENT_SECRET,
+                "redirect_uri": UPSTOX_REDIRECT_URI,
+                "grant_type": "authorization_code"
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
 
-    response = requests.post(token_url, data=payload)
     token_data = response.json()
 
-    # Save token in DB
-    await db.config.update_one(
-        {"type": "upstox"},
-        {"$set": {"access_token": token_data.get("access_token")}},
-        upsert=True
-    )
+    if "access_token" not in token_data:
+        raise HTTPException(status_code=400, detail=token_data)
 
-    return {"message": "Upstox connected successfully"}
+    # Save token in memory (we’ll improve this later)
+    app.state.upstox_access_token = token_data["access_token"]
+
+    return {
+        "message": "Upstox connected successfully",
+        "access_token_received": True
+    }
 
 
 @api_router.post("/auth/register", response_model=Token)
