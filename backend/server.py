@@ -76,15 +76,15 @@ async def lifespan(app: FastAPI):
     await initialize_default_admin()
     
     # Start WebSocket price feed in background
-    import asyncio
-    feed_task = asyncio.create_task(ws_manager.simulate_upstox_feed())
+    #import asyncio
+    #feed_task = asyncio.create_task(ws_manager.simulate_upstox_feed())
     
     logger.info("WebSocket price feed started")
     
     yield
     
     # Shutdown
-    feed_task.cancel()
+   # feed_task.cancel()
     client.close()
 
 app = FastAPI(title="Campus Trading Platform", version="1.0.0", lifespan=lifespan)
