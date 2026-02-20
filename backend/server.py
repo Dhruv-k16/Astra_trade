@@ -111,6 +111,7 @@ app.add_middleware(
 
 @api_router.get("/auth/callback")
 async def upstox_callback(code: str):
+    print("TOKEN URL:", UPSTOX_TOKEN_URL)
     async with httpx.AsyncClient() as client:
         response = await client.post(
             UPSTOX_TOKEN_URL,
