@@ -16,7 +16,14 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
-  const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+  // ✅ Correct environment variable
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
+
+  if (!API_BASE) {
+    console.error("REACT_APP_API_BASE_URL is not defined.");
+  }
+
+  const API = `${API_BASE}`;
 
   useEffect(() => {
     if (token) {
@@ -43,18 +50,27 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password });
     const { access_token, user: userData } = response.data;
+
     setToken(access_token);
     setUser(userData);
     localStorage.setItem('token', access_token);
+
     return userData;
   };
 
   const register = async (username, email, password) => {
-    const response = await axios.post(`${API}/auth/register`, { username, email, password });
+    const response = await axios.post(`${API}/auth/register`, {
+      username,
+      email,
+      password
+    });
+
     const { access_token, user: userData } = response.data;
+
     setToken(access_token);
     setUser(userData);
     localStorage.setItem('token', access_token);
+
     return userData;
   };
 
