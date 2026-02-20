@@ -18,6 +18,7 @@ from auth import get_password_hash, verify_password, create_access_token, get_cu
 from market_timing import get_market_status, is_market_open, get_current_ist_time
 from trade_engine import validate_trade, execute_trade
 from websocket_manager import ws_manager
+import requests
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -76,15 +77,16 @@ async def lifespan(app: FastAPI):
     await initialize_default_admin()
     
     # Start WebSocket price feed in background
-    #import asyncio
-    #feed_task = asyncio.create_task(ws_manager.simulate_upstox_feed())
+    import asyncio
+    feed_task = asyncio.create_task(ws_manager.connect_upstox_feed())
+
     
     logger.info("WebSocket price feed started")
     
     yield
     
     # Shutdown
-   # feed_task.cancel()
+    feed_task.cancel()
     client.close()
 
 app = FastAPI(title="Campus Trading Platform", version="1.0.0", lifespan=lifespan)
@@ -103,7 +105,27 @@ app.add_middleware(
 
 @api_router.get("/auth/callback")
 async def upstox_callback(code: str):
-    return {"authorization_code": code}
+    token_url = "https://api.upstox.com/v2/login/authorization/token"
+    
+    payload = {
+        "code": code,
+        "client_id": os.environ["UPSTOX_API_KEY"],
+        "client_secret": os.environ["UPSTOX_API_SECRET"],
+        "redirect_uri": os.environ["UPSTOX_REDIRECT_URI"],
+        "grant_type": "authorization_code"
+    }
+
+    response = requests.post(token_url, data=payload)
+    token_data = response.json()
+
+    # Save token in DB
+    await db.config.update_one(
+        {"type": "upstox"},
+        {"$set": {"access_token": token_data.get("access_token")}},
+        upsert=True
+    )
+
+    return {"message": "Upstox connected successfully"}
 
 
 @api_router.post("/auth/register", response_model=Token)

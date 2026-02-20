@@ -1,11 +1,21 @@
 import asyncio
 import json
-import random
+import os
+import logging
 from typing import Set, Dict
 from datetime import datetime, timezone
-import logging
+
+import websockets
+from motor.motor_asyncio import AsyncIOMotorClient
 
 logger = logging.getLogger(__name__)
+
+MONGO_URL = os.environ["MONGO_URL"]
+DB_NAME = os.environ["DB_NAME"]
+
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
+
 
 class PriceWebSocketManager:
     def __init__(self):
@@ -13,131 +23,156 @@ class PriceWebSocketManager:
         self.subscribed_instruments: Set[str] = set()
         self.price_cache: Dict[str, dict] = {}
         self.upstox_connected = False
-        self.reconnect_task = None
-        
+        self.ws = None
+
+    # ================= FRONTEND CONNECTIONS =================
+
     async def connect(self, websocket):
-        """Accept a new WebSocket connection from frontend"""
         await websocket.accept()
         self.active_connections.append(websocket)
-        logger.info(f"New WebSocket connection. Total: {len(self.active_connections)}")
-        
+        logger.info(f"Frontend connected. Total: {len(self.active_connections)}")
+
     def disconnect(self, websocket):
-        """Remove a WebSocket connection"""
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-        logger.info(f"WebSocket disconnected. Total: {len(self.active_connections)}")
-    
+        logger.info(f"Frontend disconnected. Total: {len(self.active_connections)}")
+
     async def subscribe(self, instrument_keys: list):
-        """Subscribe to instruments for price updates"""
         for key in instrument_keys:
             if key not in self.subscribed_instruments:
                 self.subscribed_instruments.add(key)
                 logger.info(f"Subscribed to {key}")
-    
+
+        # If already connected to Upstox, send live subscription
+        if self.ws and self.upstox_connected:
+            await self._send_subscription()
+
     async def unsubscribe(self, instrument_keys: list):
-        """Unsubscribe from instruments"""
         for key in instrument_keys:
-            if key in self.subscribed_instruments:
-                self.subscribed_instruments.discard(key)
-                logger.info(f"Unsubscribed from {key}")
-    
+            self.subscribed_instruments.discard(key)
+
+    # ================= BROADCAST =================
+
     async def broadcast_price_update(self, instrument_key: str, price_data: dict):
-        """Broadcast price update to all connected clients"""
+        self.price_cache[instrument_key] = price_data
+
         message = {
             "type": "price_update",
             "instrument_key": instrument_key,
             "data": price_data
         }
-        
-        # Update cache
-        self.price_cache[instrument_key] = price_data
-        
-        # Broadcast to all clients
+
         disconnected = []
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
-            except Exception as e:
-                logger.error(f"Error sending to client: {e}")
+            except:
                 disconnected.append(connection)
-        
-        # Clean up disconnected clients
+
         for conn in disconnected:
             self.disconnect(conn)
-    
+
     async def broadcast_status(self, status: str, message: str):
-        """Broadcast connection status to all clients"""
-        status_message = {
+        payload = {
             "type": "status",
             "status": status,
             "message": message
         }
-        
+
         for connection in self.active_connections:
             try:
-                await connection.send_json(status_message)
+                await connection.send_json(payload)
             except:
                 pass
-    
-    async def simulate_upstox_feed(self):
-        """Simulate Upstox WebSocket feed with realistic price movements"""
-        logger.info("Starting simulated Upstox WebSocket feed")
-        
-        # Base prices for sample stocks
-        base_prices = {
-            "NSE_EQ|INE002A01018": 2450.75,  # RELIANCE
-            "NSE_EQ|INE467B01029": 3850.20,  # TCS
-            "NSE_EQ|INE040A01034": 1550.60,  # INFY
-            "NSE_EQ|INE009A01021": 1680.40,  # HDFCBANK
-            "NSE_EQ|INE090A01021": 1245.80,  # ICICIBANK
-            "NSE_EQ|INE018A01030": 485.30,   # WIPRO
-            "NSE_EQ|INE155A01022": 920.15,   # TATAMOTORS
-            "NSE_EQ|INE437A01024": 6850.50,  # APOLLOHOSP
-        }
-        
-        # Initialize cache
-        for key, price in base_prices.items():
-            self.price_cache[key] = {
-                "last_price": price,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "change_percent": 0.0
-            }
-        
-        self.upstox_connected = True
-        await self.broadcast_status("connected", "Live market data connected")
-        
+
+    # ================= UPSTOX LIVE FEED =================
+
+    async def connect_upstox_feed(self):
+        """
+        Connect to Upstox real-time market data WebSocket
+        """
+
         while True:
             try:
-                # Update prices for subscribed instruments only
-                for instrument_key in list(self.subscribed_instruments):
-                    if instrument_key in self.price_cache:
-                        current_data = self.price_cache[instrument_key]
-                        current_price = current_data["last_price"]
-                        
-                        # Realistic price movement (-0.5% to +0.5%)
-                        change_percent = random.uniform(-0.005, 0.005)
-                        new_price = current_price * (1 + change_percent)
-                        
-                        price_update = {
-                            "last_price": round(new_price, 2),
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                            "change_percent": round(change_percent * 100, 2),
-                            "volume": random.randint(1000, 50000)
-                        }
-                        
-                        # Broadcast to all connected clients
-                        await self.broadcast_price_update(instrument_key, price_update)
-                
-                # Wait 1-2 seconds between updates (realistic feed speed)
-                await asyncio.sleep(random.uniform(1.0, 2.0))
-                
-            except Exception as e:
-                logger.error(f"Error in price feed: {e}")
-                self.upstox_connected = False
-                await self.broadcast_status("disconnected", "Live connection lost - reconnecting...")
-                await asyncio.sleep(5)
-                self.upstox_connected = True
-                await self.broadcast_status("connected", "Reconnected to live market data")
+                config = await db.config.find_one({"type": "upstox"})
+                if not config or "access_token" not in config:
+                    logger.warning("Upstox access token not found. Waiting...")
+                    await asyncio.sleep(5)
+                    continue
 
-# Global WebSocket manager instance
+                access_token = config["access_token"]
+
+                uri = "wss://api.upstox.com/v2/feed/market-data-feed"
+
+                logger.info("Connecting to Upstox WebSocket...")
+                async with websockets.connect(
+                    uri,
+                    extra_headers={
+                        "Authorization": f"Bearer {access_token}"
+                    },
+                    ping_interval=20,
+                    ping_timeout=20
+                ) as websocket:
+
+                    self.ws = websocket
+                    self.upstox_connected = True
+                    await self.broadcast_status("connected", "Connected to live NSE market")
+
+                    logger.info("Connected to Upstox WebSocket")
+
+                    # Subscribe to instruments
+                    await self._send_subscription()
+
+                    while True:
+                        message = await websocket.recv()
+                        await self._handle_upstox_message(message)
+
+            except Exception as e:
+                logger.error(f"Upstox connection error: {e}")
+                self.upstox_connected = False
+                await self.broadcast_status("disconnected", "Market feed disconnected - retrying...")
+                await asyncio.sleep(5)
+
+    async def _send_subscription(self):
+        if not self.subscribed_instruments:
+            return
+
+        payload = {
+            "guid": "campus-trade-feed",
+            "method": "subscribe",
+            "data": {
+                "mode": "full",
+                "instrumentKeys": list(self.subscribed_instruments)
+            }
+        }
+
+        await self.ws.send(json.dumps(payload))
+        logger.info(f"Subscribed to {len(self.subscribed_instruments)} instruments")
+
+    async def _handle_upstox_message(self, raw_message):
+        try:
+            data = json.loads(raw_message)
+
+            if "data" not in data:
+                return
+
+            for item in data["data"]:
+                instrument_key = item.get("instrumentKey")
+                ltp_data = item.get("ltp")
+
+                if instrument_key and ltp_data:
+                    price_update = {
+                        "last_price": ltp_data.get("ltp"),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "volume": ltp_data.get("volume", 0),
+                        "change_percent": ltp_data.get("percentChange", 0)
+                    }
+
+                    await self.broadcast_price_update(instrument_key, price_update)
+
+        except Exception as e:
+            logger.error(f"Error processing Upstox message: {e}")
+
+
+# Global instance
 ws_manager = PriceWebSocketManager()
