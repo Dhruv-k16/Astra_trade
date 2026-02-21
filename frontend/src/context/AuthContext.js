@@ -11,19 +11,17 @@ export const useAuth = () => {
   return context;
 };
 
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL ||
+  process.env.REACT_APP_BACKEND_URL ||
+  "https://astra-trade.onrender.com";
+
+const API = `${API_BASE}/api`;
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
-
-  // ✅ Correct environment variable
-  const API_BASE = process.env.REACT_APP_API_BASE_URL;
-
-  if (!API_BASE) {
-    console.error("REACT_APP_API_BASE_URL is not defined.");
-  }
-
-  const API = `${API_BASE}`;
 
   useEffect(() => {
     if (token) {
@@ -40,7 +38,6 @@ export const AuthProvider = ({ children }) => {
       });
       setUser(response.data);
     } catch (error) {
-      console.error('Failed to fetch user:', error);
       logout();
     } finally {
       setLoading(false);
@@ -50,11 +47,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password });
     const { access_token, user: userData } = response.data;
-
     setToken(access_token);
     setUser(userData);
     localStorage.setItem('token', access_token);
-
     return userData;
   };
 
@@ -64,13 +59,10 @@ export const AuthProvider = ({ children }) => {
       email,
       password
     });
-
     const { access_token, user: userData } = response.data;
-
     setToken(access_token);
     setUser(userData);
     localStorage.setItem('token', access_token);
-
     return userData;
   };
 
