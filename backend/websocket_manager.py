@@ -25,7 +25,7 @@ class PriceWebSocketManager:
         self.upstox_connected = False
         self.ws = None
 
-    # ---------------- FRONTEND CONNECTIONS ---------------- #
+    # ---------------- FRONTEND ---------------- #
 
     async def connect(self, websocket):
         await websocket.accept()
@@ -84,56 +84,54 @@ class PriceWebSocketManager:
 
     # ---------------- UPSTOX FEED ---------------- #
 
-async def connect_upstox_feed(self):
-    while True:
-        try:
-            config = await db.app_settings.find_one({"key": "upstox_token"})
+    async def connect_upstox_feed(self):
+        while True:
+            try:
+                config = await db.app_settings.find_one({"key": "upstox_token"})
 
-            if not config or not config.get("access_token"):
-                logger.warning("Upstox access token not found. Waiting...")
-                await asyncio.sleep(5)
-                continue
+                if not config or not config.get("access_token"):
+                    logger.warning("Upstox access token not found. Waiting...")
+                    await asyncio.sleep(5)
+                    continue
 
-            access_token = config["access_token"]
+                access_token = config["access_token"]
 
-            uri = "wss://api.upstox.com/v2/feed/market-data-feed"
+                uri = "wss://api.upstox.com/v2/feed/market-data-feed"
 
-            logger.info("Connecting to Upstox WebSocket...")
-            logger.info(f"Using token: {access_token[:20]}...")
+                logger.info("Connecting to Upstox WebSocket...")
+                logger.info(f"Using token: {access_token[:20]}...")
 
-            async with websockets.connect(
-                uri,
-                extra_headers={
-                    "Authorization": f"Bearer {access_token}"
-                },
-                ping_interval=20,
-                ping_timeout=20
-            ) as websocket:
+                async with websockets.connect(
+                    uri,
+                    extra_headers={
+                        "Authorization": f"Bearer {access_token}"
+                    },
+                    ping_interval=20,
+                    ping_timeout=20
+                ) as websocket:
 
-                self.ws = websocket
-                self.upstox_connected = True
+                    self.ws = websocket
+                    self.upstox_connected = True
 
+                    await self.broadcast_status(
+                        "connected",
+                        "Connected to live NSE market"
+                    )
+
+                    await self._send_subscription()
+
+                    while True:
+                        message = await websocket.recv()
+                        await self._handle_upstox_message(message)
+
+            except Exception as e:
+                logger.error(f"Upstox connection error: {e}")
+                self.upstox_connected = False
                 await self.broadcast_status(
-                    "connected",
-                    "Connected to live NSE market"
+                    "disconnected",
+                    "Market feed disconnected - retrying..."
                 )
-
-                await self._send_subscription()
-
-                while True:
-                    message = await websocket.recv()
-                    await self._handle_upstox_message(message)
-
-        except Exception as e:
-            logger.error(f"Upstox connection error: {e}")
-            self.upstox_connected = False
-            await self.broadcast_status(
-                "disconnected",
-                "Market feed disconnected - retrying..."
-            )
-            await asyncio.sleep(5)
-
-            
+                await asyncio.sleep(5)
 
     async def _send_subscription(self):
         if not self.subscribed_instruments:
