@@ -96,15 +96,14 @@ class PriceWebSocketManager:
 
                 access_token = config["access_token"]
 
-                uri = "wss://api.upstox.com/v2/feed/market-data-feed"
+                uri = f"wss://api.upstox.com/v2/feed/market-data-feed?access_token={access_token}"
 
                 logger.info("Connecting to Upstox WebSocket...")
 
                 async with websockets.connect(
                     uri,
-                    additional_headers={
-                        "Authorization": f"Bearer {access_token}"
-                    }
+                    ping_interval=20,
+                    ping_timeout=20
                 ) as websocket:
 
                     self.ws = websocket
