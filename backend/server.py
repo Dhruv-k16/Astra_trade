@@ -113,14 +113,14 @@ app.add_middleware(
 
 @app.get("/api/auth/callback")
 async def upstox_callback(code: str):
-    # Exchange code for access token
+
     token_response = requests.post(
-        "https://api.upstox.com/v2/login/authorization/token",
+        UPSTOX_TOKEN_URL,
         data={
             "code": code,
-            "client_id": os.getenv("UPSTOX_CLIENT_ID"),
-            "client_secret": os.getenv("UPSTOX_CLIENT_SECRET"),
-            "redirect_uri": os.getenv("UPSTOX_REDIRECT_URI"),
+            "client_id": UPSTOX_CLIENT_ID,
+            "client_secret": UPSTOX_CLIENT_SECRET,
+            "redirect_uri": UPSTOX_REDIRECT_URI,
             "grant_type": "authorization_code"
         }
     )
@@ -129,9 +129,9 @@ async def upstox_callback(code: str):
     access_token = token_data.get("access_token")
 
     if not access_token:
-        return {"error": "Failed to get access token"}
+        return {"error": token_data}
 
-    # 🔥 STORE IN MONGODB
+    # ✅ FIX: await added
     await db.app_settings.update_one(
         {"key": "upstox_token"},
         {
