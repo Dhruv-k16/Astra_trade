@@ -87,7 +87,6 @@ class PriceWebSocketManager:
     async def connect_upstox_feed(self):
         while True:
             try:
-                # ✅ FIXED COLLECTION
                 config = await db.app_settings.find_one({"key": "upstox_token"})
 
                 if not config or "access_token" not in config:
@@ -103,17 +102,18 @@ class PriceWebSocketManager:
 
                 async with websockets.connect(
                     uri,
-                    extra_headers={
+                    additional_headers={
                         "Authorization": f"Bearer {access_token}"
-                    },
-                    ping_interval=20,
-                    ping_timeout=20
+                    }
                 ) as websocket:
 
                     self.ws = websocket
                     self.upstox_connected = True
 
-                    await self.broadcast_status("connected", "Connected to live NSE market")
+                    await self.broadcast_status(
+                        "connected",
+                        "Connected to live NSE market"
+                    )
 
                     await self._send_subscription()
 
@@ -124,7 +124,10 @@ class PriceWebSocketManager:
             except Exception as e:
                 logger.error(f"Upstox connection error: {e}")
                 self.upstox_connected = False
-                await self.broadcast_status("disconnected", "Market feed disconnected - retrying...")
+                await self.broadcast_status(
+                    "disconnected",
+                    "Market feed disconnected - retrying..."
+                )
                 await asyncio.sleep(5)
 
     async def _send_subscription(self):
@@ -141,6 +144,7 @@ class PriceWebSocketManager:
         }
 
         await self.ws.send(json.dumps(payload))
+        logger.info(f"Subscribed to {len(self.subscribed_instruments)} instruments")
 
     async def _handle_upstox_message(self, raw_message):
         try:
