@@ -25,7 +25,7 @@ class PriceWebSocketManager:
         self.upstox_connected = False
         self.ws = None
 
-    # ================= FRONTEND CONNECTIONS =================
+    # ---------------- FRONTEND CONNECTIONS ---------------- #
 
     async def connect(self, websocket):
         await websocket.accept()
@@ -39,11 +39,8 @@ class PriceWebSocketManager:
 
     async def subscribe(self, instrument_keys: list):
         for key in instrument_keys:
-            if key not in self.subscribed_instruments:
-                self.subscribed_instruments.add(key)
-                logger.info(f"Subscribed to {key}")
+            self.subscribed_instruments.add(key)
 
-        # If already connected to Upstox, send live subscription
         if self.ws and self.upstox_connected:
             await self._send_subscription()
 
@@ -51,7 +48,7 @@ class PriceWebSocketManager:
         for key in instrument_keys:
             self.subscribed_instruments.discard(key)
 
-    # ================= BROADCAST =================
+    # ---------------- BROADCAST ---------------- #
 
     async def broadcast_price_update(self, instrument_key: str, price_data: dict):
         self.price_cache[instrument_key] = price_data
@@ -85,16 +82,14 @@ class PriceWebSocketManager:
             except:
                 pass
 
-    # ================= UPSTOX LIVE FEED =================
+    # ---------------- UPSTOX FEED ---------------- #
 
     async def connect_upstox_feed(self):
-        """
-        Connect to Upstox real-time market data WebSocket
-        """
-
         while True:
             try:
-                config = await db.config.find_one({"type": "upstox"})
+                # ✅ FIXED COLLECTION
+                config = await db.app_settings.find_one({"key": "upstox_token"})
+
                 if not config or "access_token" not in config:
                     logger.warning("Upstox access token not found. Waiting...")
                     await asyncio.sleep(5)
@@ -105,6 +100,7 @@ class PriceWebSocketManager:
                 uri = "wss://api.upstox.com/v2/feed/market-data-feed"
 
                 logger.info("Connecting to Upstox WebSocket...")
+
                 async with websockets.connect(
                     uri,
                     extra_headers={
@@ -116,11 +112,9 @@ class PriceWebSocketManager:
 
                     self.ws = websocket
                     self.upstox_connected = True
+
                     await self.broadcast_status("connected", "Connected to live NSE market")
 
-                    logger.info("Connected to Upstox WebSocket")
-
-                    # Subscribe to instruments
                     await self._send_subscription()
 
                     while True:
@@ -147,7 +141,6 @@ class PriceWebSocketManager:
         }
 
         await self.ws.send(json.dumps(payload))
-        logger.info(f"Subscribed to {len(self.subscribed_instruments)} instruments")
 
     async def _handle_upstox_message(self, raw_message):
         try:
@@ -174,5 +167,4 @@ class PriceWebSocketManager:
             logger.error(f"Error processing Upstox message: {e}")
 
 
-# Global instance
 ws_manager = PriceWebSocketManager()
