@@ -99,10 +99,11 @@ app = FastAPI(title="Campus Trading Platform", version="1.0.0", lifespan=lifespa
 api_router = APIRouter(prefix="/api")
 
 # CORS
+origins=["https://astra-trade.vercel.app",]
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["https://astra-trade.vercel.app/"],
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
