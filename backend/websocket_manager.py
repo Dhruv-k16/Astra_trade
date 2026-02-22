@@ -130,7 +130,12 @@ class PriceWebSocketManager:
                 logger.info(f"Connecting to V3 WebSocket: {ws_url}")
 
                 # STEP B — Connect to WebSocket
-                async with websockets.connect(ws_url) as websocket:
+                async with websockets.connect(
+                    ws_url,
+                    ping_interval=20,   # send ping every 20s to keep connection alive
+                    ping_timeout=30,    # wait 30s for pong before declaring dead
+                    close_timeout=10
+                ) as websocket:
                     self.ws = websocket
                     self.upstox_connected = True
                     logger.info("✅ Upstox V3 WebSocket connected")
