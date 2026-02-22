@@ -239,24 +239,38 @@ async def market_status():
 # ============= STOCK SEARCH =============
 
 @api_router.get("/stocks/search")
-async def search_stocks(q: str = Query(..., min_length=1)):
+async def search_stocks(q: str = Query("", min_length=0)):
 
-    stocks = await db.instruments.find(
-        {
-            "$or": [
-                {"trading_symbol": {"$regex": q, "$options": "i"}},
-                {"name": {"$regex": q, "$options": "i"}}
-            ]
-        },
-        {
-            "_id": 0,
-            "instrument_key": 1,
-            "symbol": 1,
-            "name": 1,
-            "exchange": 1,
-            "segment": 1
-        }
-    ).limit(20).to_list(20)
+    if not q:
+        # Return top 20 popular stocks when no query
+        stocks = await db.instruments.find(
+            {"exchange": "NSE"},
+            {
+                "_id": 0,
+                "instrument_key": 1,
+                "trading_symbol": 1,
+                "name": 1,
+                "exchange": 1,
+                "segment": 1
+            }
+        ).limit(20).to_list(20)
+    else:
+        stocks = await db.instruments.find(
+            {
+                "$or": [
+                    {"trading_symbol": {"$regex": q, "$options": "i"}},
+                    {"name": {"$regex": q, "$options": "i"}}
+                ]
+            },
+            {
+                "_id": 0,
+                "instrument_key": 1,
+                "trading_symbol": 1,
+                "name": 1,
+                "exchange": 1,
+                "segment": 1
+            }
+        ).limit(20).to_list(20)
 
     return {"results": stocks}
 
@@ -325,9 +339,9 @@ async def subscribe_stock(data: dict):
     if not instrument_key:
         return {"error": "instrument_key required"}
 
-    await ws_manager.subscribe_instruments([instrument_key])
+    await ws_manager.subscribe([instrument_key])
 
-    return {"status": "subscribed"}
+    return {"status": "subscribed", "instrument_key": instrument_key}
 
 
 
