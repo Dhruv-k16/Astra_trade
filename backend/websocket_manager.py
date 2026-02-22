@@ -96,16 +96,30 @@ class PriceWebSocketManager:
 
                 access_token = config["access_token"]
 
-                uri = f"wss://api.upstox.com/v2/feed/market-data-feed"
+                logger.info("Authorizing Upstox V3 WebSocket...")
 
-                logger.info("Connecting to Upstox WebSocket...")
-                logger.info(f"Using token: {access_token[:20]}...")
+                # Step 1: Get authorized WebSocket URL
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(
+                        "https://api.upstox.com/v3/feed/market-data-feed/authorize",
+                        headers={
+                            "Authorization": f"Bearer {access_token}"
+                        }
+                    ) as response:
 
+                        if response.status != 200:
+                            logger.error(f"Authorization failed: {response.status}")
+                            await asyncio.sleep(5)
+                            continue
+
+                        auth_data = await response.json()
+                        ws_url = auth_data["data"]["authorized_redirect_uri"]
+
+                logger.info(f"Connecting to V3 WebSocket: {ws_url}")
+
+                # Step 2: Connect to returned WebSocket URL
                 async with websockets.connect(
-                    uri,
-                    additional_headers=[
-                        ("Authorization", f"Bearer {access_token}")
-                    ],
+                    ws_url,
                     ping_interval=20,
                     ping_timeout=20
                 ) as websocket:
@@ -115,7 +129,7 @@ class PriceWebSocketManager:
 
                     await self.broadcast_status(
                         "connected",
-                        "Connected to live NSE market"
+                        "Connected to Upstox V3 market feed"
                     )
 
                     await self._send_subscription()
@@ -132,6 +146,8 @@ class PriceWebSocketManager:
                     "Market feed disconnected - retrying..."
                 )
                 await asyncio.sleep(5)
+
+                
 
     async def _send_subscription(self):
         if not self.subscribed_instruments:
