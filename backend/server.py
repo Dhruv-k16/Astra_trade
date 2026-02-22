@@ -238,26 +238,27 @@ async def market_status():
 
 # ============= STOCK SEARCH =============
 
-@app.get("/stocks/search")
+@api_router.get("/stocks/search")
 async def search_stocks(q: str = Query(..., min_length=1)):
 
-    stocks = db.instruments.find(
+    stocks = await db.instruments.find(
         {
             "$or": [
-                {"tradingsymbol": {"$regex": q, "$options": "i"}},
+                {"trading_symbol": {"$regex": q, "$options": "i"}},
                 {"name": {"$regex": q, "$options": "i"}}
             ]
         },
         {
             "_id": 0,
             "instrument_key": 1,
-            "tradingsymbol": 1,
+            "symbol": 1,
             "name": 1,
-            "exchange": 1
+            "exchange": 1,
+            "segment": 1
         }
-    ).limit(20)
+    ).limit(20).to_list(20)
 
-    return list(stocks)
+    return {"results": stocks}
 
 # ============= STOCK PRICES =============
 
