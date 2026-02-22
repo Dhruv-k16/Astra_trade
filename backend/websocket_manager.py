@@ -103,7 +103,7 @@ class PriceWebSocketManager:
 
                 async with websockets.connect(
                     uri,
-                    extra_headers=[
+                    additional_headers=[
                         ("Authorization", f"Bearer {access_token}")
                     ],
                     ping_interval=20,
