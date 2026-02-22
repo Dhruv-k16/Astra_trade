@@ -70,7 +70,7 @@ const MarketPage = () => {
         `${API}/trade`,
         {
           instrument_key: selectedStock.instrument_key,
-          trading_symbol: selectedStock.trading_symbol,
+          symbol: selectedStock.symbol,
           quantity: parseInt(quantity),
           trade_type: tradeType
         },

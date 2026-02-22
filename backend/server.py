@@ -313,6 +313,25 @@ async def get_multiple_prices(instrument_keys: str):
             prices[key] = ws_manager.price_cache[key]
     return {"prices": prices}
 
+
+
+
+
+
+@api_router.post("/stocks/subscribe")
+async def subscribe_stock(data: dict):
+    instrument_key = data.get("instrument_key")
+
+    if not instrument_key:
+        return {"error": "instrument_key required"}
+
+    await ws_manager.subscribe_instruments([instrument_key])
+
+    return {"status": "subscribed"}
+
+
+
+
 # ============= TRADING =============
 
 @api_router.post("/trade", response_model=Order)

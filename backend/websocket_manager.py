@@ -39,11 +39,18 @@ class PriceWebSocketManager:
         logger.info(f"Frontend disconnected. Total: {len(self.active_connections)}")
 
     async def subscribe(self, instrument_keys: list):
-        for key in instrument_keys:
-            self.subscribed_instruments.add(key)
+        new_keys = []
 
-        if self.ws and self.upstox_connected:
-            await self._send_subscription()
+        for key in instrument_keys:
+            if key not in self.subscribed_instruments:
+                self.subscribed_instruments.add(key)
+                new_keys.append(key)
+
+        if new_keys:
+            await self._send_subscription(new_keys)
+
+            if self.ws and self.upstox_connected:
+                await self._send_subscription()
 
     async def unsubscribe(self, instrument_keys: list):
         for key in instrument_keys:
@@ -127,7 +134,8 @@ class PriceWebSocketManager:
                         "Connected to live NSE market"
                     )
 
-                    await self._send_subscription()
+                    if self.subscribed_instruments:
+                        await self._send_subscription(list(self.subscribed_instruments))
 
                     # STEP C — Receive binary messages
                     while True:
@@ -149,21 +157,28 @@ class PriceWebSocketManager:
 
 
 
-    async def _send_subscription(self):
-        if not self.subscribed_instruments:
+    async def _send_subscription(self, instrument_keys=None):
+        if not self.ws or not self.upstox_connected:
+            return
+
+        if instrument_keys is None:
+            instrument_keys = list(self.subscribed_instruments)
+
+        if not instrument_keys:
             return
 
         payload = {
-            "guid": "campus-trade-feed",
-            "method": "subscribe",
+            "guid": str(datetime.now().timestamp()),
+            "method": "sub",  # IMPORTANT: must be 'sub'
             "data": {
-                "mode": "full",
-                "instrumentKeys": list(self.subscribed_instruments)
+                "mode": "ltpc",  # faster + lighter for simulation
+                "instrumentKeys": instrument_keys
             }
         }
 
         await self.ws.send(json.dumps(payload))
-        logger.info(f"Subscribed to {len(self.subscribed_instruments)} instruments")
+        logger.info(f"Subscribed to {len(instrument_keys)} instruments")
+
 
     async def _handle_upstox_binary(self, message: bytes):
         try:
@@ -184,12 +199,18 @@ class PriceWebSocketManager:
                         continue
                 else:
                     continue
+                
+                previous_price = self.price_cache.get(instrument_key, {}).get("last_price")
+
+                change_percent = 0
+                if previous_price and previous_price != 0:
+                    change_percent = ((ltp - previous_price) / previous_price) * 100    
 
                 price_update = {
                     "last_price": ltp,
                     "volume": volume,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "change_percent": 0
+                    "change_percent": round(change_percent, 2)
                 }
 
                 await self.broadcast_price_update(instrument_key, price_update)
