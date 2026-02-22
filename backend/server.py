@@ -242,7 +242,6 @@ async def market_status():
 async def search_stocks(q: str = Query("", min_length=0)):
 
     # Real NSE equity stocks have instrument_key starting with "NSE_EQ|INE"
-    # Bonds/SGBs/T-bills start with IN00, IN20, IN29 etc — we exclude those
     base_filter = {
         "instrument_key": {"$regex": "^NSE_EQ\\|INE", "$options": ""}
     }
@@ -250,14 +249,28 @@ async def search_stocks(q: str = Query("", min_length=0)):
     projection = {
         "_id": 0,
         "instrument_key": 1,
-        "symbol": 1,       # actual field name in DB (not trading_symbol)
+        "symbol": 1,
         "name": 1,
         "exchange": 1,
         "segment": 1
     }
 
     if not q:
-        stocks = await db.instruments.find(base_filter, projection).limit(20).to_list(20)
+        # Return well-known Nifty 50 stocks by symbol name
+        popular = [
+            "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK",
+            "WIPRO", "SBIN", "BAJFINANCE", "HINDUNILVR", "AXISBANK",
+            "KOTAKBANK", "LT", "ITC", "TATAMOTORS", "MARUTI",
+            "SUNPHARMA", "TITAN", "ULTRACEMCO", "NESTLEIND", "POWERGRID"
+        ]
+        stocks = await db.instruments.find(
+            {**base_filter, "symbol": {"$in": popular}},
+            projection
+        ).to_list(20)
+
+        # If popular stocks not found (symbol mismatch), fall back to any NSE_EQ|INE stocks
+        if not stocks:
+            stocks = await db.instruments.find(base_filter, projection).limit(20).to_list(20)
     else:
         stocks = await db.instruments.find(
             {
@@ -270,7 +283,7 @@ async def search_stocks(q: str = Query("", min_length=0)):
             projection
         ).limit(20).to_list(20)
 
-    # Normalize: add trading_symbol alias so frontend works without changes
+    # Add trading_symbol alias so frontend works without changes
     for s in stocks:
         s["trading_symbol"] = s.get("symbol", "")
 
@@ -555,6 +568,8 @@ async def get_upstox_auth_url(admin: dict = Depends(verify_admin)):
     return {"auth_url": auth_url}
 
 
+@api_router.get("/admin/upstox-status")
+async def upstox_status(admin: dict = Depends(verify_admin)):
     """Get Upstox token and WebSocket connection status"""
     config = await db.app_settings.find_one({"key": "upstox_token"})
 
@@ -581,7 +596,8 @@ async def get_upstox_auth_url(admin: dict = Depends(verify_admin)):
         )
     }
 
-
+@api_router.get("/admin/contest")
+async def get_contest_config(admin: dict = Depends(verify_admin)):
     """Get contest configuration (admin only)"""
     config = await db.contest_config.find_one()
     if config:
