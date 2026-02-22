@@ -165,11 +165,14 @@ class PriceWebSocketManager:
         await self.ws.send(json.dumps(payload))
         logger.info(f"Subscribed to {len(self.subscribed_instruments)} instruments")
 
-    async def _handle_upstox_binary(self, message:bytes):
+    async def _handle_upstox_binary(self, message: bytes):
         try:
-            data = json.loads(raw_message)
-
             logger.info(f"Received binary data length: {len(message)}")
+
+            # 🔴 IMPORTANT:
+            # Upstox V3 sends protobuf binary.
+            # For now we are just confirming receipt.
+            # Proper decoding will be added next.
 
         except Exception as e:
             logger.error(f"Error processing Upstox message: {e}")
