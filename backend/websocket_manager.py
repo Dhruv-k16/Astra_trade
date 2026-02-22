@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import logging
+import aiohttp
 from typing import Set, Dict
 from datetime import datetime, timezone
 
@@ -147,7 +148,7 @@ class PriceWebSocketManager:
                 )
                 await asyncio.sleep(5)
 
-                
+
 
     async def _send_subscription(self):
         if not self.subscribed_instruments:
