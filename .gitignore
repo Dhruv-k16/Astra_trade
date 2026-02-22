@@ -79,3 +79,7 @@ agenthub/agents/youtube/db
 # Mobile development
 android-sdk/ ctcp-project.zip
 ctcp-project.zip
+
+
+backend/.env
+.env
