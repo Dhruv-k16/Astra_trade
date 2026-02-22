@@ -83,7 +83,7 @@ class PriceWebSocketManager:
             except:
                 pass
 
-    # ---------------- UPSTOX FEED ---------------- #
+    # ---------------- UPSTOX FEED ---------------- 
 
     async def connect_upstox_feed(self):
         while True:
@@ -99,45 +99,44 @@ class PriceWebSocketManager:
 
                 logger.info("Authorizing Upstox V3 WebSocket...")
 
-                # Step 1: Get authorized WebSocket URL
+                # STEP A — Authorize and get WebSocket URL
                 async with aiohttp.ClientSession() as session:
                     async with session.get(
                         "https://api.upstox.com/v3/feed/market-data-feed/authorize",
                         headers={
-                            "Authorization": f"Bearer {access_token}"
+                            "Authorization": f"Bearer {access_token}",
+                            "Accept": "application/json"
                         }
                     ) as response:
 
                         if response.status != 200:
-                            logger.error(f"Authorization failed: {response.status}")
-                            await asyncio.sleep(5)
-                            continue
+                            raise Exception(f"Authorization failed: {response.status}")
 
-                        auth_data = await response.json()
-                        ws_url = auth_data["data"]["authorized_redirect_uri"]
+                        data = await response.json()
+                        ws_url = data["data"]["authorized_redirect_uri"]
 
                 logger.info(f"Connecting to V3 WebSocket: {ws_url}")
 
-                # Step 2: Connect to returned WebSocket URL
-                async with websockets.connect(
-                    ws_url,
-                    ping_interval=20,
-                    ping_timeout=20
-                ) as websocket:
-
+                # STEP B — Connect to WebSocket
+                async with websockets.connect(ws_url) as websocket:
                     self.ws = websocket
                     self.upstox_connected = True
 
                     await self.broadcast_status(
                         "connected",
-                        "Connected to Upstox V3 market feed"
+                        "Connected to live NSE market"
                     )
 
                     await self._send_subscription()
 
+                    # STEP C — Receive binary messages
                     while True:
                         message = await websocket.recv()
-                        await self._handle_upstox_message(message)
+
+                        if isinstance(message, bytes):
+                            await self._handle_upstox_binary(message)
+                        else:
+                            logger.warning("Unexpected text message received")
 
             except Exception as e:
                 logger.error(f"Upstox connection error: {e}")
@@ -166,26 +165,11 @@ class PriceWebSocketManager:
         await self.ws.send(json.dumps(payload))
         logger.info(f"Subscribed to {len(self.subscribed_instruments)} instruments")
 
-    async def _handle_upstox_message(self, raw_message):
+    async def _handle_upstox_binary(self, message:bytes):
         try:
             data = json.loads(raw_message)
 
-            if "data" not in data:
-                return
-
-            for item in data["data"]:
-                instrument_key = item.get("instrumentKey")
-                ltp_data = item.get("ltp")
-
-                if instrument_key and ltp_data:
-                    price_update = {
-                        "last_price": ltp_data.get("ltp"),
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                        "volume": ltp_data.get("volume", 0),
-                        "change_percent": ltp_data.get("percentChange", 0)
-                    }
-
-                    await self.broadcast_price_update(instrument_key, price_update)
+            logger.info(f"Received binary data length: {len(message)}")
 
         except Exception as e:
             logger.error(f"Error processing Upstox message: {e}")
