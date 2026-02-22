@@ -241,10 +241,14 @@ async def market_status():
 @api_router.get("/stocks/search")
 async def search_stocks(q: str = Query("", min_length=0)):
 
+    base_filter = {
+        "instrument_type": "EQ",   # only equity stocks — most reliable filter
+        "exchange": "NSE"
+    }
+
     if not q:
-        # Return top 20 popular stocks when no query
         stocks = await db.instruments.find(
-            {"exchange": "NSE"},
+            base_filter,
             {
                 "_id": 0,
                 "instrument_key": 1,
@@ -257,6 +261,7 @@ async def search_stocks(q: str = Query("", min_length=0)):
     else:
         stocks = await db.instruments.find(
             {
+                **base_filter,
                 "$or": [
                     {"trading_symbol": {"$regex": q, "$options": "i"}},
                     {"name": {"$regex": q, "$options": "i"}}
@@ -538,8 +543,35 @@ async def delete_user(user_id: str, admin: dict = Depends(verify_admin)):
 
     return {"message": "User deleted successfully"}
 
-@api_router.get("/admin/contest")
-async def get_contest_config(admin: dict = Depends(verify_admin)):
+@api_router.get("/admin/upstox-status")
+async def upstox_status(admin: dict = Depends(verify_admin)):
+    """Get Upstox token and WebSocket connection status"""
+    config = await db.app_settings.find_one({"key": "upstox_token"})
+
+    if not config or not config.get("access_token"):
+        return {
+            "status": "missing",
+            "ws_connected": False,
+            "subscribed_instruments": 0,
+            "token_updated_at": None,
+            "message": "No Upstox token found. Click 'Refresh Upstox Token' to login."
+        }
+
+    updated_at = config.get("updated_at")
+
+    return {
+        "status": "connected" if ws_manager.upstox_connected else "disconnected",
+        "ws_connected": ws_manager.upstox_connected,
+        "subscribed_instruments": len(ws_manager.subscribed_instruments),
+        "token_updated_at": str(updated_at) if updated_at else None,
+        "message": (
+            f"Live feed active — {len(ws_manager.subscribed_instruments)} instruments streaming."
+            if ws_manager.upstox_connected
+            else "Token exists but WebSocket is disconnected. It will auto-reconnect, or refresh the token if it expired."
+        )
+    }
+
+
     """Get contest configuration (admin only)"""
     config = await db.contest_config.find_one()
     if config:
