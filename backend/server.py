@@ -20,6 +20,7 @@ from websocket_manager import ws_manager
 import requests
 import httpx
 from pymongo import MongoClient
+from fastapi import Query 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -237,24 +238,26 @@ async def market_status():
 
 # ============= STOCK SEARCH =============
 
-@api_router.get("/stocks/search")
-async def search_stocks(q: str = ""):
-    """Search stocks by symbol or name"""
-    if not q:
-        stocks = await db.instruments.find().limit(20).to_list(20)
-    else:
-        stocks = await db.instruments.find({
+@app.get("/stocks/search")
+async def search_stocks(q: str = Query(..., min_length=1)):
+
+    stocks = db.instruments.find(
+        {
             "$or": [
-                {"trading_symbol": {"$regex": q, "$options": "i"}},
+                {"tradingsymbol": {"$regex": q, "$options": "i"}},
                 {"name": {"$regex": q, "$options": "i"}}
             ]
-        }).limit(20).to_list(20)
+        },
+        {
+            "_id": 0,
+            "instrument_key": 1,
+            "tradingsymbol": 1,
+            "name": 1,
+            "exchange": 1
+        }
+    ).limit(20)
 
-    # Remove MongoDB _id field
-    for stock in stocks:
-        stock.pop('_id', None)
-
-    return {"results": stocks}
+    return list(stocks)
 
 # ============= STOCK PRICES =============
 
