@@ -5,7 +5,7 @@ import logging
 import aiohttp
 from typing import Set, Dict
 from datetime import datetime, timezone
-
+from marketdata_pb2 import FeedResponse
 import websockets
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -167,15 +167,34 @@ class PriceWebSocketManager:
 
     async def _handle_upstox_binary(self, message: bytes):
         try:
-            logger.info(f"Received binary data length: {len(message)}")
+            feed_response = FeedResponse()
+            feed_response.ParseFromString(message)
 
-            # 🔴 IMPORTANT:
-            # Upstox V3 sends protobuf binary.
-            # For now we are just confirming receipt.
-            # Proper decoding will be added next.
+            for instrument_key, feed in feed_response.feeds.items():
+
+                if feed.HasField("ltpc"):
+                    ltp = feed.ltpc.ltp
+                    volume = feed.ltpc.ltq
+
+                elif feed.HasField("fullFeed"):
+                    if feed.fullFeed.marketFF.ltpc:
+                        ltp = feed.fullFeed.marketFF.ltpc.ltp
+                        volume = feed.fullFeed.marketFF.ltpc.ltq
+                    else:
+                        continue
+                else:
+                    continue
+
+                price_update = {
+                    "last_price": ltp,
+                    "volume": volume,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "change_percent": 0
+                }
+
+                await self.broadcast_price_update(instrument_key, price_update)
 
         except Exception as e:
             logger.error(f"Error processing Upstox message: {e}")
-
 
 ws_manager = PriceWebSocketManager()
