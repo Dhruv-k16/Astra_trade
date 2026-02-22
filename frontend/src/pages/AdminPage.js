@@ -36,16 +36,16 @@ const AdminPage = () => {
     }
   };
 
-  const reauthorizeUpstox = () => {
-    const clientId = process.env.REACT_APP_UPSTOX_CLIENT_ID;
-    const redirectUri = process.env.REACT_APP_UPSTOX_REDIRECT_URI;
-    if (!clientId || !redirectUri) {
-      toast.error('REACT_APP_UPSTOX_CLIENT_ID or REACT_APP_UPSTOX_REDIRECT_URI not set in env');
-      return;
+  const reauthorizeUpstox = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/upstox-auth-url`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      window.open(response.data.auth_url, '_blank');
+      toast.info('Complete login in the new tab, then click "Refresh Status" to confirm.');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to get auth URL — check backend env vars');
     }
-    const authUrl = `https://api.upstox.com/v2/login/authorization/dialog?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    window.open(authUrl, '_blank');
-    toast.info('Complete login in the new tab, then click Refresh Status');
   };
 
   const fetchUsers = async () => {

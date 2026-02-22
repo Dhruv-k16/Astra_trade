@@ -241,41 +241,38 @@ async def market_status():
 @api_router.get("/stocks/search")
 async def search_stocks(q: str = Query("", min_length=0)):
 
+    # Real NSE equity stocks have instrument_key starting with "NSE_EQ|INE"
+    # Bonds/SGBs/T-bills start with IN00, IN20, IN29 etc — we exclude those
     base_filter = {
-        "instrument_type": "EQ",   # only equity stocks — most reliable filter
-        "exchange": "NSE"
+        "instrument_key": {"$regex": "^NSE_EQ\\|INE", "$options": ""}
+    }
+
+    projection = {
+        "_id": 0,
+        "instrument_key": 1,
+        "symbol": 1,       # actual field name in DB (not trading_symbol)
+        "name": 1,
+        "exchange": 1,
+        "segment": 1
     }
 
     if not q:
-        stocks = await db.instruments.find(
-            base_filter,
-            {
-                "_id": 0,
-                "instrument_key": 1,
-                "trading_symbol": 1,
-                "name": 1,
-                "exchange": 1,
-                "segment": 1
-            }
-        ).limit(20).to_list(20)
+        stocks = await db.instruments.find(base_filter, projection).limit(20).to_list(20)
     else:
         stocks = await db.instruments.find(
             {
                 **base_filter,
                 "$or": [
-                    {"trading_symbol": {"$regex": q, "$options": "i"}},
+                    {"symbol": {"$regex": q, "$options": "i"}},
                     {"name": {"$regex": q, "$options": "i"}}
                 ]
             },
-            {
-                "_id": 0,
-                "instrument_key": 1,
-                "trading_symbol": 1,
-                "name": 1,
-                "exchange": 1,
-                "segment": 1
-            }
+            projection
         ).limit(20).to_list(20)
+
+    # Normalize: add trading_symbol alias so frontend works without changes
+    for s in stocks:
+        s["trading_symbol"] = s.get("symbol", "")
 
     return {"results": stocks}
 
@@ -543,8 +540,21 @@ async def delete_user(user_id: str, admin: dict = Depends(verify_admin)):
 
     return {"message": "User deleted successfully"}
 
-@api_router.get("/admin/upstox-status")
-async def upstox_status(admin: dict = Depends(verify_admin)):
+@api_router.get("/admin/upstox-auth-url")
+async def get_upstox_auth_url(admin: dict = Depends(verify_admin)):
+    """Return the Upstox OAuth URL for admin to click"""
+    if not UPSTOX_CLIENT_ID or not UPSTOX_REDIRECT_URI:
+        raise HTTPException(status_code=500, detail="UPSTOX_CLIENT_ID or UPSTOX_REDIRECT_URI not configured in backend env")
+    
+    auth_url = (
+        f"https://api.upstox.com/v2/login/authorization/dialog"
+        f"?response_type=code"
+        f"&client_id={UPSTOX_CLIENT_ID}"
+        f"&redirect_uri={UPSTOX_REDIRECT_URI}"
+    )
+    return {"auth_url": auth_url}
+
+
     """Get Upstox token and WebSocket connection status"""
     config = await db.app_settings.find_one({"key": "upstox_token"})
 
@@ -615,6 +625,6 @@ async def unfreeze_trading(admin: dict = Depends(verify_admin)):
 # Include router
 app.include_router(api_router)
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     return {"status": "healthy", "service": "campus-trading-platform"}
