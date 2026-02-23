@@ -15,7 +15,8 @@ async def validate_trade(trade: TradeRequest, user_data: dict, price: float, con
     if not is_open:
         raise HTTPException(status_code=400, detail=message)
     
-    user_id = user_data['id']
+    # JWT payload uses 'sub' as the user ID key
+    user_id = user_data.get('sub') or user_data.get('id')
     
     # Get user's current balance and portfolio
     user = await db.users.find_one({"id": user_id})
@@ -93,7 +94,8 @@ async def validate_trade(trade: TradeRequest, user_data: dict, price: float, con
 async def execute_trade(trade: TradeRequest, user_data: dict, price: float, db) -> Order:
     """Execute a validated trade"""
     
-    user_id = user_data['id']
+    # JWT payload uses 'sub' as the user ID key
+    user_id = user_data.get('sub') or user_data.get('id')
     order_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc)
     

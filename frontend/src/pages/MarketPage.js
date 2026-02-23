@@ -85,7 +85,7 @@ const MarketPage = () => {
         `${API}/trade`,
         {
           instrument_key: selectedStock.instrument_key,
-          symbol: selectedStock.trading_symbol, // FIX: was selectedStock.symbol which is undefined
+          trading_symbol: selectedStock.trading_symbol,  // ✅ matches TradeRequest model
           quantity: parseInt(quantity),
           trade_type: tradeType
         },
@@ -94,7 +94,14 @@ const MarketPage = () => {
       toast.success(`${tradeType === 'BUY' ? '🟢 Bought' : '🔴 Sold'} ${quantity} × ${selectedStock.trading_symbol} @ ₹${currentPrice.toFixed(2)}`);
       setShowTradeModal(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Trade failed');
+      const detail = error.response?.data?.detail;
+      // detail can be a string or a pydantic validation array — always stringify
+      const msg = typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail)
+        ? detail.map(e => e.msg || JSON.stringify(e)).join(', ')
+        : 'Trade failed';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
