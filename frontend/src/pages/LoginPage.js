@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { TrendingUp, Lock, Mail, User, Eye, EyeOff, Activity } from 'lucide-react';
+import { TrendingUp, Lock, Mail, User, Eye, EyeOff, Activity, X, ArrowLeft } from 'lucide-react';
+import axios from 'axios';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,7 +14,13 @@ const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
+  // Forgot password state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
@@ -33,6 +42,25 @@ const LoginPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      await axios.post(`${API}/auth/forgot-password`, { email: forgotEmail });
+    } catch (error) {
+      // Always show success — never reveal whether email exists (security best practice)
+    } finally {
+      setForgotLoading(false);
+      setForgotSent(true);
+    }
+  };
+
+  const closeForgotModal = () => {
+    setShowForgotModal(false);
+    setForgotEmail('');
+    setForgotSent(false);
   };
 
   return (
@@ -127,9 +155,21 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Password
-              </label>
+              {/* Password label row with Forgot password link */}
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-300">
+                  Password
+                </label>
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(true)}
+                    className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
@@ -201,6 +241,81 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ===== FORGOT PASSWORD MODAL ===== */}
+      {showForgotModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-sm p-6 shadow-2xl">
+
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Reset Password</h2>
+              <button
+                onClick={closeForgotModal}
+                className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!forgotSent ? (
+              <>
+                <p className="text-slate-400 text-sm mb-5">
+                  Enter your registered email and we'll send you a link to reset your password.
+                </p>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <input
+                      type="email"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                      placeholder="your@email.com"
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-medium transition-all disabled:opacity-50 shadow-lg"
+                  >
+                    {forgotLoading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      'Send Reset Link'
+                    )}
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-8 h-8 text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Check your inbox</h3>
+                <p className="text-slate-400 text-sm mb-2">
+                  If <span className="text-white font-medium">{forgotEmail}</span> is registered,
+                  you'll receive a reset link shortly.
+                </p>
+                <p className="text-slate-500 text-xs mb-6">
+                  Check your spam folder if you don't see it within a minute.
+                </p>
+                <button
+                  onClick={closeForgotModal}
+                  className="flex items-center gap-2 mx-auto text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to login
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
