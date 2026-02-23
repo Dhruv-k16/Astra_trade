@@ -147,11 +147,14 @@ class PriceWebSocketManager:
                         await self._send_subscription(list(self.subscribed_instruments))
 
                     # STEP C — Receive binary messages
+                    msg_count = 0
                     async for message in websocket:
+                        msg_count += 1
                         if isinstance(message, bytes):
+                            logger.info(f"📦 Binary msg #{msg_count}: {len(message)} bytes")
                             await self._handle_upstox_binary(message)
                         else:
-                            logger.debug(f"Text message from Upstox: {message}")
+                            logger.info(f"📝 Text msg #{msg_count}: {message[:200]}")
 
             except websockets.exceptions.ConnectionClosedError as e:
                 logger.warning(f"Upstox WebSocket closed: {e}. Reconnecting in 5s...")
@@ -186,67 +189,119 @@ class PriceWebSocketManager:
             }
         }
 
-        await self.ws.send(json.dumps(payload))
+        # Upstox V3 REQUIRES subscription sent as binary, not text
+        await self.ws.send(json.dumps(payload).encode('utf-8'))
         logger.info(f"📡 Subscribed to {len(instrument_keys)} instruments: {instrument_keys[:3]}{'...' if len(instrument_keys) > 3 else ''}")
 
     async def _handle_upstox_binary(self, message: bytes):
-        """Decode Upstox protobuf binary and broadcast price updates."""
+        """Decode Upstox V3 message — tries JSON first, then protobuf."""
         try:
-            feed_response = FeedResponse()
-            feed_response.ParseFromString(message)
+            # Upstox V3 sends JSON-encoded bytes (not raw protobuf)
+            text = message.decode('utf-8')
+            data = json.loads(text)
 
-            for instrument_key, feed in feed_response.feeds.items():
-                ltp = None
-                volume = 0
-                close_price = None  # cp = previous day's closing price from Upstox
+            msg_type = data.get("type", "")
 
-                if feed.HasField("ltpc"):
-                    ltp = feed.ltpc.ltp
-                    volume = getattr(feed.ltpc, 'ltq', 0)
-                    close_price = getattr(feed.ltpc, 'cp', None)
+            # First tick: market status info — just log it
+            if msg_type == "market_info":
+                segment_status = data.get("marketInfo", {}).get("segmentStatus", {})
+                nse_eq = segment_status.get("NSE_EQ", "UNKNOWN")
+                logger.info(f"📊 Market status — NSE_EQ: {nse_eq}")
+                await self.broadcast_status(
+                    "connected",
+                    f"Market status: NSE_EQ {nse_eq}"
+                )
+                return
 
-                elif feed.HasField("fullFeed"):
-                    ff = feed.fullFeed
-                    if hasattr(ff, 'marketFF') and ff.marketFF.HasField('ltpc'):
-                        ltp = ff.marketFF.ltpc.ltp
-                        volume = getattr(ff.marketFF.ltpc, 'ltq', 0)
-                        close_price = getattr(ff.marketFF.ltpc, 'cp', None)
-                    else:
+            # Second + subsequent ticks: live feed data
+            if msg_type == "live_feed":
+                feeds = data.get("feeds", {})
+                logger.info(f"📈 Live feed tick — {len(feeds)} instruments")
+
+                for instrument_key, feed_data in feeds.items():
+                    ltpc = feed_data.get("ltpc", {})
+                    if not ltpc:
                         continue
-                else:
-                    continue
 
-                if ltp is None:
-                    continue
+                    ltp = ltpc.get("ltp")
+                    if ltp is None:
+                        continue
 
-                # FIX: Calculate change vs previous day's close (cp), not vs cached price
-                change_percent = 0.0
-                if close_price and close_price != 0:
-                    change_percent = round(((ltp - close_price) / close_price) * 100, 2)
-                else:
-                    # Fallback: use first-seen price as reference
-                    open_price_ref = self.price_cache.get(instrument_key, {}).get("open_price")
-                    if open_price_ref and open_price_ref != 0:
-                        change_percent = round(((ltp - open_price_ref) / open_price_ref) * 100, 2)
+                    close_price = ltpc.get("cp")
+                    volume = int(ltpc.get("ltq", 0) or 0)
 
-                # Track open_price (first price we ever saw for this instrument in this session)
-                is_first = instrument_key not in self.price_cache
-                open_price = ltp if is_first else self.price_cache[instrument_key].get("open_price", ltp)
+                    # Change % vs previous day close price
+                    change_percent = 0.0
+                    if close_price and close_price != 0:
+                        change_percent = round(((ltp - close_price) / close_price) * 100, 2)
 
-                price_update = {
-                    "last_price": ltp,
-                    "volume": volume,
-                    "close_price": close_price,
-                    "open_price": open_price,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "change_percent": change_percent
-                }
+                    is_first = instrument_key not in self.price_cache
+                    open_price = ltp if is_first else self.price_cache[instrument_key].get("open_price", ltp)
 
-                logger.debug(f"Price update: {instrument_key} = ₹{ltp} ({change_percent:+.2f}%)")
-                await self.broadcast_price_update(instrument_key, price_update)
+                    price_update = {
+                        "last_price": ltp,
+                        "volume": volume,
+                        "close_price": close_price,
+                        "open_price": open_price,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "change_percent": change_percent
+                    }
+
+                    logger.info(f"💰 {instrument_key} = ₹{ltp} ({change_percent:+.2f}%)")
+                    await self.broadcast_price_update(instrument_key, price_update)
+                return
+
+            logger.info(f"📨 Unknown message type: {msg_type} — {text[:200]}")
+
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            # Fallback: try protobuf parsing for older format
+            try:
+                feed_response = FeedResponse()
+                feed_response.ParseFromString(message)
+
+                for instrument_key, feed in feed_response.feeds.items():
+                    ltp = None
+                    volume = 0
+                    close_price = None
+
+                    if feed.HasField("ltpc"):
+                        ltp = feed.ltpc.ltp
+                        volume = getattr(feed.ltpc, 'ltq', 0)
+                        close_price = getattr(feed.ltpc, 'cp', None)
+                    elif feed.HasField("fullFeed"):
+                        ff = feed.fullFeed
+                        if hasattr(ff, 'marketFF') and ff.marketFF.HasField('ltpc'):
+                            ltp = ff.marketFF.ltpc.ltp
+                            volume = getattr(ff.marketFF.ltpc, 'ltq', 0)
+                            close_price = getattr(ff.marketFF.ltpc, 'cp', None)
+
+                    if ltp is None:
+                        continue
+
+                    change_percent = 0.0
+                    if close_price and close_price != 0:
+                        change_percent = round(((ltp - close_price) / close_price) * 100, 2)
+
+                    is_first = instrument_key not in self.price_cache
+                    open_price = ltp if is_first else self.price_cache[instrument_key].get("open_price", ltp)
+
+                    price_update = {
+                        "last_price": ltp,
+                        "volume": volume,
+                        "close_price": close_price,
+                        "open_price": open_price,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "change_percent": change_percent
+                    }
+
+                    logger.info(f"💰 [protobuf] {instrument_key} = ₹{ltp}")
+                    await self.broadcast_price_update(instrument_key, price_update)
+
+            except Exception as e:
+                logger.error(f"Protobuf parse error: {e}", exc_info=True)
 
         except Exception as e:
-            logger.error(f"Error processing Upstox binary message: {e}", exc_info=True)
+            logger.error(f"Error processing Upstox message: {e}", exc_info=True)
 
 
 ws_manager = PriceWebSocketManager()
