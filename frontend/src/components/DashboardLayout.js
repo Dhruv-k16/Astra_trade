@@ -47,7 +47,7 @@ const DashboardLayout = () => {
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg text-white">Campus Trading</h1>
+              <h1 className="font-bold text-lg text-white">AstraEdge</h1>
               <p className="text-xs text-slate-400">Live Contest</p>
             </div>
           </div>
@@ -115,7 +115,7 @@ const DashboardLayout = () => {
 
             <div className="flex items-center space-x-2 md:hidden">
               <TrendingUp className="w-6 h-6 text-blue-500" />
-              <span className="font-bold text-white">Campus Trading</span>
+              <span className="font-bold text-white">AstraEdge</span>
             </div>
 
             <div className="ml-auto"></div>
