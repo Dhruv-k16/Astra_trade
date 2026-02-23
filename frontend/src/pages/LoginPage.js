@@ -51,7 +51,7 @@ const LoginPage = () => {
             <Activity className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent mb-2">
-            Campus Trading
+            AstraEdge
           </h1>
           <p className="text-slate-400">
             {isLogin ? 'Welcome back to the competition' : 'Join the ultimate trading challenge'}
@@ -178,12 +178,12 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* Demo Credentials */}
+        {/* Demo Credentials 
         <div className="mt-6 text-center">
           <p className="text-sm text-slate-400">
             Demo Login: <span className="text-blue-400 font-mono">admin@campus.edu</span> / <span className="text-blue-400 font-mono">Admin@123</span>
           </p>
-        </div>
+        </div>*/}
 
         {/* Stats */}
         <div className="mt-8 grid grid-cols-3 gap-4 text-center">
@@ -196,7 +196,7 @@ const LoginPage = () => {
             <div className="text-xs text-slate-400 mt-1">Days Contest</div>
           </div>
           <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
-            <div className="text-2xl font-bold text-gradient-primary font-mono">NSE</div>
+            <div className="text-2xl font-bold text-gradient-primary font-mono">NSE/BSE/MCX</div>
             <div className="text-xs text-slate-400 mt-1">Live Data</div>
           </div>
         </div>
