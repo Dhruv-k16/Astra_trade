@@ -21,8 +21,6 @@ import requests
 import httpx
 from pymongo import MongoClient
 from fastapi import Query 
-import resend
-import secrets
 
 
 
@@ -644,96 +642,44 @@ async def unfreeze_trading(admin: dict = Depends(verify_admin)):
     )
     return {"message": "Trading unfrozen"}
 
-#================================forgot password routes=================================
-@api_router.post("/auth/forgot-password")
-async def forgot_password(data: dict):
-    import resend, secrets
+#================================password reset routes=================================
+
+@api_router.post("/auth/verify-email")
+async def verify_email(data: dict):
+    """Step 1 — verify email exists before allowing password reset"""
     email = data.get("email", "").strip().lower()
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
 
     user = await db.users.find_one({"email": email})
     if not user:
-        # Return 200 regardless — never reveal if email exists
-        return {"message": "If this email is registered, a reset link has been sent."}
+        raise HTTPException(status_code=404, detail="No account found with this email address")
 
-    # Generate secure token, store with 1-hour expiry
-    reset_token = secrets.token_urlsafe(32)
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-
-    await db.password_resets.update_one(
-        {"email": email},
-        {"$set": {
-            "email": email,
-            "token": reset_token,
-            "expires_at": expires_at.isoformat(),
-            "used": False
-        }},
-        upsert=True
-    )
-
-    frontend_url = os.getenv("FRONTEND_URL", "https://astra-trade.vercel.app")
-    reset_link = f"{frontend_url}/reset-password?token={reset_token}"
-
-    resend.api_key = os.getenv("RESEND_API_KEY")
-    resend.Emails.send({
-        "from": "AstraEdge <onboarding@resend.dev>",  # ← change to your Resend verified domain
-        "to": [email],
-        "subject": "Reset your AstraEdge password",
-        "html": f"""
-        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;background:#0f172a;color:#fff;padding:40px;border-radius:12px;">
-          <h1 style="font-size:28px;margin-bottom:4px;">AstraEdge</h1>
-          <p style="color:#94a3b8;margin-bottom:32px;font-size:13px;">Astra Trading and Investing Club</p>
-          <h2 style="font-size:20px;margin-bottom:12px;">Reset your password</h2>
-          <p style="color:#cbd5e1;margin-bottom:24px;line-height:1.6;">
-            Hi {user.get('username', 'there')},<br><br>
-            We received a request to reset your AstraEdge password.
-            Click the button below — this link expires in <strong>1 hour</strong>.
-          </p>
-          <a href="{reset_link}"
-             style="display:inline-block;background:linear-gradient(to right,#2563eb,#4f46e5);
-                    color:white;padding:14px 32px;border-radius:8px;
-                    text-decoration:none;font-weight:bold;font-size:16px;">
-            Reset Password
-          </a>
-          <p style="color:#64748b;font-size:12px;margin-top:32px;">
-            If you didn't request this, you can safely ignore this email.<br>
-            This link will expire in 1 hour and can only be used once.
-          </p>
-        </div>
-        """
-    })
-
-    return {"message": "If this email is registered, a reset link has been sent."}
+    return {"verified": True, "username": user.get("username", "")}
 
 
-@api_router.post("/auth/reset-password")
-async def reset_password(data: dict):
-    token = data.get("token", "").strip()
+@api_router.post("/auth/reset-password-direct")
+async def reset_password_direct(data: dict):
+    """Step 2 — update password directly after email verified on frontend"""
+    email = data.get("email", "").strip().lower()
     new_password = data.get("new_password", "").strip()
 
-    if not token or not new_password:
-        raise HTTPException(status_code=400, detail="Token and new password are required")
+    if not email or not new_password:
+        raise HTTPException(status_code=400, detail="Email and new password are required")
     if len(new_password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
-    record = await db.password_resets.find_one({"token": token})
-    if not record:
-        raise HTTPException(status_code=400, detail="Invalid or expired reset link")
-    if record.get("used"):
-        raise HTTPException(status_code=400, detail="This reset link has already been used")
-
-    expires_at = datetime.fromisoformat(record["expires_at"])
-    if datetime.now(timezone.utc) > expires_at:
-        raise HTTPException(status_code=400, detail="Reset link has expired. Please request a new one.")
+    user = await db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=404, detail="No account found with this email address")
 
     await db.users.update_one(
-        {"email": record["email"]},
+        {"email": email},
         {"$set": {"password": get_password_hash(new_password)}}
     )
-    await db.password_resets.update_one({"token": token}, {"$set": {"used": True}})
 
-    return {"message": "Password reset successfully"}
+    return {"message": "Password updated successfully"}
+
 
 # ============= REGISTER ROUTER — must be LAST =============
 app.include_router(api_router)
