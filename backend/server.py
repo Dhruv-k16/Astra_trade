@@ -644,13 +644,6 @@ async def unfreeze_trading(admin: dict = Depends(verify_admin)):
     )
     return {"message": "Trading unfrozen"}
 
-# Include router
-app.include_router(api_router)
-
-@app.api_route("/health", methods=["GET", "HEAD"])
-async def health_check():
-    return {"status": "healthy", "service": "campus-trading-platform"}
-
 #================================forgot password routes=================================
 @api_router.post("/auth/forgot-password")
 async def forgot_password(data: dict):
@@ -741,3 +734,10 @@ async def reset_password(data: dict):
     await db.password_resets.update_one({"token": token}, {"$set": {"used": True}})
 
     return {"message": "Password reset successfully"}
+
+# ============= REGISTER ROUTER — must be LAST =============
+app.include_router(api_router)
+
+@app.api_route("/health", methods=["GET", "HEAD"])
+async def health_check():
+    return {"status": "healthy", "service": "campus-trading-platform"}
